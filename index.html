@@ -30,14 +30,24 @@
         
         @keyframes bounce-small { 0%, 100% { transform: translateY(-10%); } 50% { transform: translateY(0); } }
         .animate-bounce-star { animation: bounce-small 1s infinite; }
+        
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        /* Prevent text selection while drawing */
+        /* Prevent text selection while drawing and dragging */
         .no-select {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
         }
+
+        /* Drag and Drop Styles */
+        .draggable { cursor: grab; touch-action: none; }
+        .draggable:active { cursor: grabbing; }
+        .dropzone { transition: all 0.3s ease; }
+        .dropzone.dragover { transform: scale(1.05); border-color: #4F46E5; background-color: #EEF2FF; }
+        .is-dragging { opacity: 0.5; z-index: 50; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen w-full flex flex-col md:flex-row overflow-hidden no-select">
@@ -144,9 +154,17 @@ const LESSONS = RAW_DATA.map((d, index) => {
       { word: d.ev[0][0], english: d.ev[0][1], icon: d.ev[0][2] },
       { word: d.ev[1][0], english: d.ev[1][1], icon: d.ev[1][2] }
     ],
-    harakat: d.h.map(hItem => ({
-      sound: hItem[0], label: hItem[1], example: hItem[2], quran: hItem[3]
-    })),
+    harakat: d.h.map((hItem, hIdx) => {
+      // Map Harakat visual shapes based on index (0=Fatha, 1=Kasra, 2=Damma)
+      let shape = '';
+      if(hIdx === 0) shape = 'َ';
+      else if(hIdx === 1) shape = 'ِ';
+      else shape = 'ُ';
+      
+      return {
+        sound: hItem[0], label: hItem[1], example: hItem[2], quran: hItem[3], shape: shape
+      }
+    }),
     nasheed: d.n
   };
 });
@@ -168,29 +186,23 @@ const scrollArea = document.getElementById('main-scroll-area');
 
 // --- AUDIO LOGIC ---
 function playSound(text, btnElement) {
-    // 1. Visual physical feedback on the button
     if(btnElement) {
         btnElement.classList.add('scale-95');
         setTimeout(() => btnElement.classList.remove('scale-95'), 150);
     }
 
-    // Stop any currently playing audio
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
     }
     window.speechSynthesis.cancel();
 
-    // 2. Fallback Speech Synthesis Engine
     const speakText = () => {
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(text);
-            
-            // Try to find an Arabic voice specifically
             const voices = window.speechSynthesis.getVoices();
             const arabicVoice = voices.find(voice => voice.lang.includes('ar'));
             if (arabicVoice) utterance.voice = arabicVoice;
-            
             utterance.lang = 'ar-SA'; 
             utterance.rate = 0.8; 
             utterance.pitch = 1.2; 
@@ -198,30 +210,27 @@ function playSound(text, btnElement) {
         }
     };
 
-    // 3. Try to fetch real audio via an open API, fallback to speech synthesis if it fails
-    // We remove Harakat for the API search to get better matches
     const searchWord = stripHarakat(text);
-    
-    // Using a free Google Translate TTS proxy endpoint for reliable audio
-    // (Note: In a production app, you would host your own MP3s)
     try {
         const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=ar&client=tw-ob`;
         currentAudio = new Audio(audioUrl);
-        
         currentAudio.play().catch(error => {
-            console.warn("Audio playback failed, falling back to Speech Synthesis:", error);
-            speakText(); // Fallback
+            speakText(); 
         });
     } catch (e) {
-        console.warn("Audio request failed, falling back to Speech Synthesis");
-        speakText(); // Fallback
+        speakText(); 
     }
 }
 
-// Ensure voices are loaded (required for some browsers)
 window.speechSynthesis.onvoiceschanged = () => {
     window.speechSynthesis.getVoices();
 };
+
+function triggerVibration() {
+    if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]); // Double vibrate for error feedback
+    }
+}
 
 // --- RENDER FUNCTIONS ---
 
@@ -292,7 +301,6 @@ function renderMainContent() {
                         <div class="text-6xl md:text-8xl mb-4">${lesson.animal.icon}</div>
                         <div class="text-5xl md:text-6xl font-bold mb-2 arabic-text ${lesson.textAccent}" dir="rtl">${lesson.animal.word}</div>
                         <div class="text-xl md:text-2xl font-medium text-gray-500 uppercase tracking-widest">${lesson.animal.english}</div>
-                        <!-- PLAY SOUND BUTTON -->
                         <button onclick="playSound('${lesson.animal.word}', this)" class="mt-6 mx-auto flex items-center justify-center w-14 h-14 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-transform hover:scale-110">
                             <i data-lucide="volume-2" class="w-6 h-6"></i>
                         </button>
@@ -332,7 +340,6 @@ function renderMainContent() {
                             <div class="p-5 text-center">
                                 <div class="text-lg md:text-xl font-bold text-gray-600 mb-2">${h.label}</div>
                                 <div class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 arabic-text" dir="rtl">${h.example}</div>
-                                <!-- PLAY SOUND BUTTON -->
                                 <button onclick="playSound('${h.sound}', this)" class="w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-white transition-transform active:scale-95 ${lesson.accent}">
                                     <i data-lucide="volume-2" class="w-5 h-5"></i> Listen
                                 </button>
@@ -347,7 +354,7 @@ function renderMainContent() {
                     </div>
                     <h3 class="text-xl md:text-2xl font-bold mb-6 flex items-center gap-3 relative z-10">
                         <i data-lucide="star" class="w-6 h-6 text-yellow-400"></i> 
-                        Quran Connection (نَكْتَشِفُ مِنَ الْقُرْآن)
+                        Quran Connection
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
                         ${lesson.harakat.map(h => `
@@ -365,6 +372,44 @@ function renderMainContent() {
         html = `
             <div class="animate-fade-in flex flex-col items-center w-full gap-8 md:gap-12 pb-8">
                 
+                <!-- NEW DRAG AND DROP GAME -->
+                <div class="w-full bg-indigo-50 p-6 md:p-8 rounded-3xl shadow-lg border-2 border-indigo-200 text-center relative overflow-hidden">
+                    <div class="inline-flex items-center gap-2 bg-white text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6 shadow-sm border border-indigo-100">
+                        <span class="animate-bounce">🧩</span> Match the Vowels!
+                    </div>
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Drag the vowel to the correct box!</h2>
+                    <p class="text-sm text-gray-500 mb-6">Drag and Drop</p>
+                    
+                    <div id="drag-drop-container" class="flex flex-col items-center gap-8 w-full">
+                        <!-- Dropzones -->
+                        <div class="flex justify-center gap-4 w-full" dir="rtl">
+                            ${lesson.harakat.map((h, idx) => `
+                                <div class="flex flex-col items-center gap-2">
+                                    <div class="text-sm font-bold text-gray-500">${h.label}</div>
+                                    <div class="dropzone w-20 h-24 md:w-24 md:h-28 bg-white border-4 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center relative shadow-inner" data-correct-idx="${idx}" id="dropzone-${idx}">
+                                        <span class="text-5xl md:text-6xl font-bold arabic-text text-gray-300 absolute inset-0 flex items-center justify-center pointer-events-none">${lesson.letter}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Draggables -->
+                        <div class="flex justify-center gap-6 w-full p-4 bg-white/50 rounded-2xl border border-indigo-100" id="draggables-container" dir="rtl">
+                            <!-- Draggables injected via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Success overlay -->
+                    <div id="drag-success-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 hidden flex-col items-center justify-center">
+                        <i data-lucide="star" class="w-20 h-20 text-yellow-400 fill-yellow-400 animate-pop mb-4"></i>
+                        <h2 class="text-3xl font-bold text-indigo-600 arabic-text">Mumtaz! (Excellent!)</h2>
+                        <button onclick="initDragAndDrop()" class="mt-6 px-6 py-2 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-700 transition-colors">
+                            Play Again
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DRAWING CANVAS -->
                 <div class="w-full bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 text-center">
                     <div class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6">
                         <span class="animate-bounce">✏️</span> Teacher Prompt: "Trace the letter carefully!"
@@ -384,6 +429,7 @@ function renderMainContent() {
                     </div>
                 </div>
 
+                <!-- HIDE AND SEEK -->
                 <div class="${lesson.color} w-full p-6 md:p-8 rounded-3xl shadow-lg text-center">
                     <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Hide and Seek! 🔍</h2>
                     <p class="text-sm md:text-base text-gray-600 font-medium mb-6">Can you find the words that have the letter <strong class="text-xl md:text-2xl arabic-text">${lesson.letter}</strong> in them?</p>
@@ -392,6 +438,7 @@ function renderMainContent() {
                     </div>
                 </div>
 
+                <!-- NASHEED -->
                 <div class="w-full bg-yellow-50 p-6 md:p-8 rounded-3xl border-2 border-yellow-200 text-center shadow-sm">
                     <h2 class="text-xl md:text-2xl font-bold text-yellow-700 mb-3 flex items-center justify-center gap-2">
                         🎵 Sing Along!
@@ -407,11 +454,213 @@ function renderMainContent() {
     lucide.createIcons();
 
     if (currentTab === 2) {
-        // Wait 100ms for CSS layout to completely finish before setting Canvas coordinates
         setTimeout(() => {
             initCanvas();
             initHideAndSeekGame();
+            initDragAndDrop();
         }, 100);
+    }
+}
+
+// --- LOGIC: DRAG AND DROP GAME ---
+let completedDrops = 0;
+
+function initDragAndDrop() {
+    const lesson = LESSONS[currentLessonIdx];
+    const container = document.getElementById('draggables-container');
+    const overlay = document.getElementById('drag-success-overlay');
+    const dropzones = document.querySelectorAll('.dropzone');
+    
+    overlay.classList.add('hidden');
+    overlay.classList.remove('flex');
+    completedDrops = 0;
+
+    // Reset Dropzones
+    dropzones.forEach(dz => {
+        dz.innerHTML = `<span class="text-5xl md:text-6xl font-bold arabic-text text-gray-300 absolute inset-0 flex items-center justify-center pointer-events-none">${lesson.letter}</span>`;
+        dz.classList.remove('bg-green-50', 'border-green-400', 'draggable-placed');
+        dz.classList.add('border-gray-300', 'border-dashed');
+    });
+
+    // Create Shuffled Draggables
+    let draggablesData = lesson.harakat.map((h, idx) => ({ idx: idx, shape: h.shape }));
+    draggablesData = draggablesData.sort(() => Math.random() - 0.5);
+
+    container.innerHTML = draggablesData.map(d => `
+        <div class="draggable w-16 h-16 md:w-20 md:h-20 bg-white shadow-md border-2 border-indigo-200 rounded-xl flex items-center justify-center text-4xl font-bold arabic-text text-indigo-600 hover:scale-110 hover:shadow-lg transition-transform z-20" 
+             draggable="true" 
+             data-idx="${d.idx}" 
+             id="drag-${d.idx}">
+            <span class="absolute" style="top: ${d.idx === 1 ? '10px' : '-20px'}">${d.shape}</span>
+            <span class="text-gray-200 pointer-events-none" style="font-size: 0.5em;">◌</span>
+        </div>
+    `).join('');
+
+    setupDragEvents();
+}
+
+function setupDragEvents() {
+    const draggables = document.querySelectorAll('.draggable');
+    const dropzones = document.querySelectorAll('.dropzone');
+    
+    let draggedItem = null;
+    let startX = 0;
+    let startY = 0;
+    let initialTransform = '';
+
+    // --- MOUSE EVENTS (HTML5 Drag and Drop) ---
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', (e) => {
+            draggedItem = draggable;
+            setTimeout(() => draggable.classList.add('is-dragging'), 0);
+            e.dataTransfer.setData('text/plain', draggable.dataset.idx);
+        });
+
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('is-dragging');
+            draggedItem = null;
+        });
+    });
+
+    dropzones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if(!zone.classList.contains('draggable-placed')) {
+                zone.classList.add('dragover');
+            }
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('dragover');
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            const draggedIdx = e.dataTransfer.getData('text/plain');
+            handleDrop(zone, draggedIdx, document.querySelector(`[data-idx="${draggedIdx}"]`));
+        });
+    });
+
+    // --- TOUCH EVENTS (Mobile Custom Handling) ---
+    draggables.forEach(draggable => {
+        draggable.addEventListener('touchstart', (e) => {
+            draggedItem = draggable;
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            initialTransform = draggable.style.transform;
+            draggable.style.position = 'absolute';
+            draggable.style.zIndex = '100';
+            document.body.appendChild(draggable); // Move to body to drag freely
+            moveElement(draggable, touch.clientX, touch.clientY);
+        }, {passive: false});
+
+        draggable.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent scrolling
+            if (!draggedItem) return;
+            const touch = e.touches[0];
+            moveElement(draggedItem, touch.clientX, touch.clientY);
+            
+            // Highlight dropzone if over
+            dropzones.forEach(zone => {
+                const rect = zone.getBoundingClientRect();
+                if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                    touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                    if(!zone.classList.contains('draggable-placed')) zone.classList.add('dragover');
+                } else {
+                    zone.classList.remove('dragover');
+                }
+            });
+        }, {passive: false});
+
+        draggable.addEventListener('touchend', (e) => {
+            if (!draggedItem) return;
+            const touch = e.changedTouches[0];
+            let droppedOnValidZone = false;
+
+            dropzones.forEach(zone => {
+                const rect = zone.getBoundingClientRect();
+                if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                    touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                    
+                    if(!zone.classList.contains('draggable-placed')) {
+                        handleDrop(zone, draggedItem.dataset.idx, draggedItem, true);
+                        droppedOnValidZone = true;
+                    }
+                }
+                zone.classList.remove('dragover');
+            });
+
+            if (!droppedOnValidZone) {
+                // Return to original container if dropped outside
+                draggedItem.style.position = 'relative';
+                draggedItem.style.left = 'auto';
+                draggedItem.style.top = 'auto';
+                draggedItem.style.transform = initialTransform;
+                document.getElementById('draggables-container').appendChild(draggedItem);
+            }
+            draggedItem = null;
+        });
+    });
+}
+
+function moveElement(el, clientX, clientY) {
+    el.style.left = (clientX - el.offsetWidth / 2) + 'px';
+    el.style.top = (clientY - el.offsetHeight / 2) + 'px';
+}
+
+function handleDrop(zone, draggedIdx, element, isTouch = false) {
+    const targetIdx = zone.dataset.correctIdx;
+    const targetIdxNumber = parseInt(targetIdx, 10);
+    const draggedIdxNumber = parseInt(draggedIdx, 10);
+    
+    if (draggedIdxNumber === targetIdxNumber) {
+        // Correct! Play "Saheeh" sound
+        playSound('صَحِيح', null);
+        
+        const lesson = LESSONS[currentLessonIdx];
+        
+        // Morph the placeholder into the fully vowelled letter perfectly!
+        zone.innerHTML = `
+            <span class="text-5xl md:text-6xl font-bold arabic-text text-indigo-600 absolute inset-0 flex items-center justify-center pointer-events-none animate-pop">${lesson.harakat[targetIdxNumber].sound}</span>
+            <span class="absolute -top-4 -right-4 text-yellow-400 animate-bounce-star z-50"><i data-lucide="star" class="w-10 h-10 fill-current"></i></span>
+        `;
+        
+        zone.classList.add('bg-green-50', 'border-green-400', 'draggable-placed');
+        zone.classList.remove('border-gray-300', 'border-dashed');
+        
+        // Remove the dragged piece completely from DOM since it is now solved
+        element.remove(); 
+        lucide.createIcons();
+        
+        // Play the sound of the correctly matched letter shortly after
+        setTimeout(() => { playSound(lesson.harakat[targetIdxNumber].sound, null); }, 800);
+
+        completedDrops++;
+        if (completedDrops === 3) {
+            setTimeout(() => {
+                const overlay = document.getElementById('drag-success-overlay');
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                playSound('مُمْتَاز', null); // "Mumtaz"
+            }, 1000);
+        }
+    } else {
+        // Wrong!
+        triggerVibration();
+        zone.classList.add('border-red-400', 'bg-red-50');
+        setTimeout(() => {
+            zone.classList.remove('border-red-400', 'bg-red-50');
+        }, 500);
+
+        if (isTouch) {
+            // Return to original container
+            element.style.position = 'relative';
+            element.style.left = 'auto';
+            element.style.top = 'auto';
+            document.getElementById('draggables-container').appendChild(element);
+        }
     }
 }
 
@@ -420,7 +669,6 @@ function initHideAndSeekGame() {
     const lesson = LESSONS[currentLessonIdx];
     const container = document.getElementById('hide-and-seek-container');
     
-    // Logic to select words
     const correctWords = [lesson.animal.word, lesson.everyday[0].word];
     const wrongWords = [];
     
@@ -437,14 +685,14 @@ function initHideAndSeekGame() {
     ].sort(() => Math.random() - 0.5);
 
     container.innerHTML = gameWords.map((item, index) => `
-        <button id="hs-btn-${index}" data-correct="${item.hasLetter}" onclick="handleWordClick(${index}, ${item.hasLetter}, '${lesson.accent}')"
+        <button id="hs-btn-${index}" data-correct="${item.hasLetter}" onclick="handleHideSeekClick(${index}, ${item.hasLetter}, '${lesson.accent}')"
             class="relative text-2xl sm:text-4xl font-bold arabic-text p-4 sm:p-6 rounded-2xl shadow-sm border-2 transition-all duration-300 transform bg-white text-gray-800 hover:bg-gray-50 border-gray-200" dir="rtl">
             ${item.word}
         </button>
     `).join('');
 }
 
-function handleWordClick(index, isCorrect, accentClass) {
+function handleHideSeekClick(index, isCorrect, accentClass) {
     const btn = document.getElementById(`hs-btn-${index}`);
     if (btn.disabled) return;
     
@@ -453,8 +701,9 @@ function handleWordClick(index, isCorrect, accentClass) {
         btn.disabled = true;
         btn.innerHTML += `<span class="absolute -top-3 -right-3 text-yellow-400 animate-bounce-star"><i data-lucide="star" class="w-8 h-8 fill-current"></i></span>`;
         lucide.createIcons();
-        playSound('صَحِيح', null); // Play "correct" in Arabic
+        playSound('صَحِيح', null); 
     } else {
+        triggerVibration(); 
         btn.className = `relative text-2xl sm:text-4xl font-bold arabic-text p-4 sm:p-6 rounded-2xl shadow-sm border-2 transition-all duration-300 transform bg-gray-100 text-gray-400 border-gray-200 opacity-50`;
         btn.disabled = true;
     }
@@ -468,7 +717,6 @@ function initCanvas() {
     canvasCtx = canvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
     
-    // Increase actual resolution for crisp lines (retina handling)
     canvas.width = rect.width * 2;
     canvas.height = rect.height * 2;
     
@@ -478,13 +726,11 @@ function initCanvas() {
     canvasCtx.lineWidth = 16;
     canvasCtx.strokeStyle = '#4F46E5'; 
 
-    // Bind events - using an anonymous function prevents duplicate bindings on re-init
     canvas.onmousedown = startDrawing;
     canvas.onmousemove = draw;
     canvas.onmouseup = stopDrawing;
     canvas.onmouseleave = stopDrawing;
     
-    // Mobile Touch events
     canvas.ontouchstart = (e) => { e.preventDefault(); startDrawing(e); };
     canvas.ontouchmove = (e) => { e.preventDefault(); draw(e); };
     canvas.ontouchend = stopDrawing;
@@ -564,10 +810,8 @@ btnNext.addEventListener('click', () => {
     if (currentLessonIdx < LESSONS.length - 1) changeLesson(currentLessonIdx + 1);
 });
 
-// Update canvas dimension tracking on browser window resize
 window.addEventListener('resize', () => {
     if(currentTab === 2) {
-        // Debounce slightly to wait for browser to finish resizing
         setTimeout(initCanvas, 150);
     }
 });
