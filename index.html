@@ -408,7 +408,7 @@ function renderMainContent() {
                 <!-- DRAWING CANVAS -->
                 <div class="w-full bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 text-center relative overflow-hidden transition-colors duration-300" id="canvas-container">
                     <div id="drawing-prompt" class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6 shadow-sm border border-indigo-100 transition-colors duration-300">
-                        <span class="animate-bounce" id="prompt-icon">✏️</span> <span id="prompt-text">Teacher Prompt: "Trace the letter carefully!"</span>
+                        <span class="animate-bounce" id="prompt-icon">✏️</span> <span id="prompt-text">Teacher Prompt: "Trace the letter precisely!"</span>
                     </div>
                     <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Draw the Letter</h2>
                     
@@ -418,12 +418,12 @@ function renderMainContent() {
                             <canvas id="drawing-canvas" class="absolute inset-0 w-full h-full cursor-crosshair"></canvas>
                         </div>
                         
-                        <div class="flex items-center gap-4 justify-center mt-4">
-                            <button onclick="clearCanvas()" class="flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full transition-colors">
+                        <div class="flex items-center gap-4 justify-center mt-4 w-full">
+                            <button onclick="clearCanvas()" class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full transition-colors">
                                 <i data-lucide="eraser" class="w-5 h-5"></i> Clear
                             </button>
-                            <button onclick="checkDrawing()" class="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition-colors shadow-md">
-                                <i data-lucide="check-circle" class="w-5 h-5"></i> I'm Done! ✨
+                            <button onclick="checkDrawingStrict()" class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition-colors shadow-md">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i> Check
                             </button>
                         </div>
                     </div>
@@ -432,7 +432,7 @@ function renderMainContent() {
                     <div id="draw-success-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-md z-10 hidden flex-col items-center justify-center rounded-3xl">
                         <i data-lucide="star" class="w-24 h-24 text-yellow-400 fill-yellow-400 animate-pop mb-4"></i>
                         <h2 class="text-4xl font-bold text-green-500 arabic-text">Mumtaz!</h2>
-                        <p class="text-gray-600 mt-2 font-bold text-xl">Beautiful Drawing!</p>
+                        <p class="text-gray-600 mt-2 font-bold text-xl">Perfect Drawing!</p>
                         <button onclick="resetDrawing()" class="mt-8 px-8 py-3 bg-green-500 text-white font-bold rounded-full hover:bg-green-600 transition-colors shadow-md">
                             Draw Again
                         </button>
@@ -701,7 +701,7 @@ function handleHideSeekClick(index, isCorrect, accentClass) {
     }
 }
 
-// --- LOGIC: CANVAS ---
+// --- LOGIC: CANVAS STRICT VALIDATION ---
 function initCanvas() {
     const canvas = document.getElementById('drawing-canvas');
     const targetCanvas = document.getElementById('target-canvas');
@@ -722,7 +722,6 @@ function initCanvas() {
     canvasCtx.lineWidth = 16;
     canvasCtx.strokeStyle = '#4F46E5'; 
 
-    // Render the perfect background letter
     targetCtx.scale(2, 2);
     targetCtx.clearRect(0, 0, rect.width, rect.height);
     targetCtx.textAlign = 'center';
@@ -731,7 +730,7 @@ function initCanvas() {
     const isSmallScreen = window.innerWidth < 640;
     const fontSize = isSmallScreen ? 180 : 250;
     targetCtx.font = `bold ${fontSize}px "Noto Kufi Arabic", sans-serif`;
-    targetCtx.fillStyle = '#F3F4F6'; 
+    targetCtx.fillStyle = '#E5E7EB'; // Gray-200 for the tracing guide
     
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
@@ -770,17 +769,16 @@ function showDrawingError(msg) {
             prompt.classList.replace('border-red-200', 'border-indigo-100');
             promptIcon.innerText = '✏️';
             promptIcon.classList.add('animate-bounce');
-            promptText.innerText = 'Teacher Prompt: "Trace the letter carefully!"';
+            promptText.innerText = 'Teacher Prompt: "Trace the letter precisely!"';
         }, 3000);
     }
     
     setTimeout(() => canvasContainer.classList.remove('border-red-400'), 500);
 }
 
-function checkDrawing() {
+function checkDrawingStrict() {
     const canvas = document.getElementById('drawing-canvas');
-    const targetCanvas = document.getElementById('target-canvas');
-    if (!canvas || !targetCanvas) return;
+    if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
@@ -789,7 +787,7 @@ function checkDrawing() {
 
     const userData = ctx.getImageData(0, 0, width, height).data;
     
-    // Create an invisible thick hitbox to calculate drawing accuracy
+    // Create a hidden canvas to draw the PERFECT strict boundaries
     const hiddenCanvas = document.createElement('canvas');
     hiddenCanvas.width = width;
     hiddenCanvas.height = height;
@@ -805,9 +803,9 @@ function checkDrawing() {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     
-    // Create a very thick and forgiving outline for 5-year-olds
+    // Create the Strict Hitbox: Only slightly wider than the pen stroke
     hiddenCtx.lineJoin = 'round';
-    hiddenCtx.lineWidth = 60; 
+    hiddenCtx.lineWidth = 30; // Strict boundary
     hiddenCtx.strokeStyle = 'black';
     hiddenCtx.strokeText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
     hiddenCtx.fillStyle = 'black';
@@ -816,34 +814,45 @@ function checkDrawing() {
     const targetData = hiddenCtx.getImageData(0, 0, width, height).data;
 
     let userPixelCount = 0;
+    let targetPixelCount = 0;
     let overlapCount = 0;
 
+    // Scan all pixels to calculate overlap
     for (let i = 3; i < userData.length; i += 4) {
-        if (userData[i] > 10) {
-            userPixelCount++;
-            if (targetData[i] > 10) {
-                overlapCount++;
-            }
-        }
+        const hasUser = userData[i] > 10;
+        const hasTarget = targetData[i] > 10;
+        
+        if (hasUser) userPixelCount++;
+        if (hasTarget) targetPixelCount++;
+        if (hasUser && hasTarget) overlapCount++;
     }
 
-    if (userPixelCount < 1000) {
-        showDrawingError("Draw a bit more of the letter!");
+    if (userPixelCount < 500) {
+        showDrawingError("Draw the letter first!");
         return;
     }
 
-    const accuracy = overlapCount / userPixelCount;
+    // Metric 1: Precision. How much of the user's ink is INSIDE the letter bounds?
+    const precision = overlapCount / userPixelCount; 
     
-    // Require 65% of the drawing to be inside the gray marks
-    if (accuracy > 0.65) {
+    // Metric 2: Coverage. How much of the perfect letter is COVERED by the user's ink?
+    const coverage = overlapCount / targetPixelCount; 
+    
+    // Strict Verification Rules:
+    if (coverage < 0.75) {
+        // They didn't draw enough of the letter (e.g. forgot dots, didn't finish loop)
+        showDrawingError("You missed a part! Did you trace the dots and full shape?");
+    } else if (precision < 0.70) {
+        // They scribbled too much outside the lines
+        showDrawingError("Too messy! Try to stay exactly on the gray marks.");
+    } else {
+        // Success!
         const overlay = document.getElementById('draw-success-overlay');
         if (overlay) {
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
             playSound('مُمْتَاز', null); 
         }
-    } else {
-        showDrawingError("Oops! Try to stay on the gray marks.");
     }
 }
 
