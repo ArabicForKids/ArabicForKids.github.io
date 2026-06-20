@@ -1,976 +1,518 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arabic For Kids - Level 1</title>
-    
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Junaid | Portfolio</title>
+    <!-- Favicon link pointing to your profile photo -->
+    <link rel="icon" type="image/jpeg" href="profile.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts for Arabic -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <style>
-        body { font-family: 'Nunito', sans-serif; }
-        .arabic-text { font-family: 'Noto Kufi Arabic', sans-serif; }
-        
-        /* Custom scrollbar for sidebar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        
-        @keyframes bounce-small { 0%, 100% { transform: translateY(-10%); } 50% { transform: translateY(0); } }
-        .animate-bounce-star { animation: bounce-small 1s infinite; }
-        
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        /* Prevent text selection while drawing and dragging */
-        .no-select {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        /* Drag and Drop Styles */
-        .draggable { cursor: grab; touch-action: none; }
-        .draggable:active { cursor: grabbing; }
-        .dropzone { transition: all 0.3s ease; }
-        .dropzone.dragover { transform: scale(1.05); border-color: #4F46E5; background-color: #EEF2FF; }
-        .is-dragging { opacity: 0.5; z-index: 50; }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 h-screen w-full flex flex-col md:flex-row overflow-hidden no-select">
-
-    <!-- SIDEBAR -->
-    <div class="w-full md:w-72 bg-white shadow-lg z-20 flex flex-col h-[30%] md:h-full flex-shrink-0">
-        <div class="p-4 md:p-6 bg-indigo-600 text-white text-center flex-shrink-0">
-            <h1 class="text-xl md:text-2xl font-bold">Arabic For Kids</h1>
-            <p class="opacity-80 text-xs md:text-sm mt-1">Level 1 • All 28 Letters</p>
-        </div>
-        <div id="sidebar-list" class="flex-1 overflow-y-auto p-3 flex flex-row md:flex-col gap-2 md:gap-3 items-center md:items-stretch snap-x md:snap-none">
-            <!-- Sidebar buttons injected via JS -->
-        </div>
-    </div>
-
-    <!-- MAIN CONTENT AREA -->
-    <div class="flex-1 flex flex-col h-[70%] md:h-full overflow-hidden relative">
-        
-        <!-- Top Bar - Tabs -->
-        <div class="bg-white shadow-sm p-3 sticky top-0 z-10 flex-shrink-0">
-            <div class="max-w-3xl mx-auto flex justify-center gap-2 md:gap-6" id="tabs-container">
-                <!-- Tabs injected via JS -->
-            </div>
-        </div>
-
-        <!-- Content Body -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 w-full" id="main-scroll-area">
-            <div class="max-w-5xl mx-auto" id="content-body">
-                <!-- Main content injected via JS -->
-            </div>
-        </div>
-
-        <!-- Bottom Navigation -->
-        <div class="bg-white border-t p-3 md:p-4 flex justify-between items-center z-10 flex-shrink-0">
-            <button id="btn-prev" class="flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-gray-100 text-gray-700 hover:bg-gray-200">
-                <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                <span class="hidden sm:inline">Previous Letter</span><span class="sm:hidden">Prev</span>
-            </button>
-            <button id="btn-next" class="flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">
-                <span class="hidden sm:inline">Next Letter</span><span class="sm:hidden">Next</span>
-                <i data-lucide="chevron-right" class="w-5 h-5"></i>
-            </button>
-        </div>
-
-    </div>
-
-<script>
-// --- DATA ENGINE: ALL 28 LETTERS ---
-const RAW_DATA = [
-  { l: 'أ', t: 'Alif', an: ['أَسَد', 'Lion', '🦁'], ev: [['أَب', 'Father', '🧔‍♂️'], ['أُم', 'Mother', '🧕']], h: [['أَ','a','أَسَد','وَأَرْسَلَ'], ['إِ','i','إِبْرِيق','إِخْوَانًا'], ['أُ','u','أُم','أُكَلِّمَ']], n: "Alif is a straight line, tall and neat,\nStanding like a Lion on its feet! A-A-Asad!" },
-  { l: 'ب', t: 'Baa', an: ['بَيْت', 'House', '🏠'], ev: [['بَالُون', 'Balloon', '🎈'], ['بَاب', 'Door', '🚪']], h: [['بَ','ba','بَيْت','فَتَابَ'], ['بِ','bi','بِنْت','فَبِئْسَ'], ['بُ','bu','بُوم','بُرْهَانَ']], n: "Baa is a boat sailing on the sea,\nWith one little dot underneath for me! Ba-Ba-Bayt!" },
-  { l: 'ت', t: 'Taa', an: ['تَمْر', 'Dates', '🌴'], ev: [['تُفَّاحَة', 'Apple', '🍎'], ['تَاج', 'Crown', '👑']], h: [['تَ','ta','تَمْر','تَابُوا'], ['تِ','ti','تِمْسَاح','يَأَبَتِ'], ['تُ','tu','تُفَّاحَة','تُبْتُ']], n: "Taa is a bowl that is never late,\nHolding one, two, delicious dates! Ta-Ta-Tamr!" },
-  { l: 'ث', t: 'Thaa', an: ['ثَوْر', 'Bull', '🐂'], ev: [['ثَوْب', 'Garment', '👕'], ['ثَعْلَب', 'Fox', '🦊']], h: [['ثَ','tha','ثَوْر','وَثُلُثَ'], ['ثِ','thi','ثِيَاب','ثِيَابَهُمْ'], ['ثُ','thu','ثُعْبَان','ثُبُوت']], n: "Thaa has three dots, look and see!\nOne, two, three for you and me! Tha-Tha-Thawr!" },
-  { l: 'ج', t: 'Jeem', an: ['جَمَل', 'Camel', '🐪'], ev: [['جَبَل', 'Mountain', '⛰️'], ['جُبْن', 'Cheese', '🧀']], h: [['جَ','ja','جَمَل','جَعَلَ'], ['جِ','ji','جِدَار','جِبِلًا'], ['جُ','ju','جُبْن','جُنُود']], n: "Jeem is a camel, walking so slow,\nWith one dot in its tummy, look at it go!" },
-  { l: 'ح', t: 'Haa', an: ['حِصَان', 'Horse', '🐎'], ev: [['حَلِيب', 'Milk', '🥛'], ['حُوت', 'Whale', '🐳']], h: [['حَ','ha','حَلِيب','حَلِيم'], ['حِ','hi','حِصَان','حِجَاب'], ['حُ','hu','حُوت','حُوت']], n: "Haa is a horse, galloping fast,\nWith no dots at all, from first to last!" },
-  { l: 'خ', t: 'Khaa', an: ['خَرُوف', 'Sheep', '🐑'], ev: [['خُبْز', 'Bread', '🍞'], ['خِيَار', 'Cucumber', '🥒']], h: [['خَ','kha','خَرُوف','خَلَقَ'], ['خِ','khi','خِيَار','خِلَالَ'], ['خُ','khu','خُبْز','خُبْز']], n: "Khaa has a dot, sitting on its head!\nEating yummy Khubz, before going to bed!" },
-  { l: 'د', t: 'Daal', an: ['دِيك', 'Rooster', '🐓'], ev: [['دُب', 'Bear', '🐻'], ['دَرَّاجَة', 'Bicycle', '🚲']], h: [['دَ','da','دَرَّاجَة','دَخَلَ'], ['دِ','di','دِيك','دِين'], ['دُ','du','دُب','دُعَاء']], n: "Daal is a curve, easy to draw!\nThe cutest little Dubb, you ever saw!" },
-  { l: 'ذ', t: 'Thaal', an: ['ذُبَاب', 'Fly', '🪰'], ev: [['ذِئْب', 'Wolf', '🐺'], ['ذَهَب', 'Gold', '🪙']], h: [['ذَ','tha','ذَهَب','ذَهَبَ'], ['ذِ','thi','ذِئْب','ذِكْر'], ['ذُ','thu','ذُبَاب','ذُبَاب']], n: "Thaal has a dot, right on the top!\nFlying like a Thubab, that just won't stop!" },
-  { l: 'ر', t: 'Raa', an: ['رُمَّان', 'Pomegranate', '🍎'], ev: [['رِيشَة', 'Feather', '🪶'], ['رَجُل', 'Man', '👨']], h: [['رَ','ra','رَجُل','رَحْمَة'], ['رِ','ri','رِيشَة','رِزْق'], ['رُ','ru','رُمَّان','رُسُل']], n: "Raa is a slide, curving down low!\nRed sweet Rummaan, watch it grow!" },
-  { l: 'ز', t: 'Zaa', an: ['زَرَافَة', 'Giraffe', '🦒'], ev: [['زَهْرَة', 'Flower', '🌸'], ['زَيْتُون', 'Olive', '🫒']], h: [['زَ','za','زَرَافَة','زَكَاة'], ['زِ','zi','زِرّ','زِينَة'], ['زُ','zu','زُجَاج','زُجَاج']], n: "Zaa is a slide, but with a dot!\nA tall Zarafa, standing in the spot!" },
-  { l: 'س', t: 'Seen', an: ['سَمَكَة', 'Fish', '🐟'], ev: [['سَيَّارَة', 'Car', '🚗'], ['سَرِير', 'Bed', '🛏️']], h: [['سَ','sa','سَمَكَة','سَلَام'], ['سِ','si','سِرْوَال','سِرَاج'], ['سُ','su','سُلَحْفَاة','سُبْحَان']], n: "Seen has teeth, one, two, three!\nSwimming like a Samakah, in the deep blue sea!" },
-  { l: 'ش', t: 'Sheen', an: ['شَمْس', 'Sun', '☀️'], ev: [['شَجَرَة', 'Tree', '🌳'], ['شَمْعَة', 'Candle', '🕯️']], h: [['شَ','sha','شَمْس','شَمْس'], ['شِ','shi','شِرَاع','شِتَاء'], ['شُ','shu','شُعْلَة','شُعَيْب']], n: "Sheen has three dots, shining so bright!\nLike the warm Shams, giving us light!" },
-  { l: 'ص', t: 'Saad', an: ['صَقْر', 'Falcon', '🦅'], ev: [['صَابُون', 'Soap', '🧼'], ['صُنْدُوق', 'Box', '📦']], h: [['صَ','sa','صَقْر','صَبْر'], ['صِ','si','صِنَاعَة','صِرَاط'], ['صُ','su','صُنْدُوق','صُدُور']], n: "Saad is an oval, with a little cup!\nWashing with Saboon, to clean it all up!" },
-  { l: 'ض', t: 'Daad', an: ['ضِفْدَع', 'Frog', '🐸'], ev: [['ضِرْس', 'Tooth', '🦷'], ['ضَابِط', 'Officer', '👮']], h: [['ضَ','da','ضَابِط','ضَرَبَ'], ['ضِ','di','ضِرْس','ضِيزَى'], ['ضُ','du','ضِفْدَع','ضُحَى']], n: "Daad is like Saad, but wears a dot hat!\nJumping like a Difda', imagine that!" },
-  { l: 'ط', t: 'Taa', an: ['طَائِرَة', 'Airplane', '✈️'], ev: [['طَمَاطِم', 'Tomato', '🍅'], ['طِفْل', 'Baby', '👶']], h: [['طَ','ta','طَائِرَة','طَعَام'], ['طِ','ti','طِفْل','طِين'], ['طُ','tu','طُيُور','طُيُور']], n: "Taa is an oval, with a tall stick!\nFlying in a Ta'irah, moving very quick!" },
-  { l: 'ظ', t: 'Zhaa', an: ['ظَرْف', 'Envelope', '✉️'], ev: [['ظِلّ', 'Shadow', '👤'], ['ظَبْي', 'Antelope', '🦌']], h: [['ظَ','zha','ظَبْي','ظَلَمَ'], ['ظِ','zhi','ظِلّ','ظِلّ'], ['ظُ','zhu','ظُفْر','ظُلُمَات']], n: "Zhaa is like Taa, with a dot to show!\nSending a Zharf, to a friend I know!" },
-  { l: 'ع', t: 'Ayn', an: ['عَيْن', 'Eye', '👁️'], ev: [['عُصْفُور', 'Bird', '🐦'], ['عِنَب', 'Grapes', '🍇']], h: [['عَ','a','عَيْن','عَلِيم'], ['عِ','i','عِنَب','عِنْدَ'], ['عُ','u','عُصْفُور','عُقْدَة']], n: "Ayn is a semi-circle, with a big belly below!\nSeeing with my Ayn, everywhere I go!" },
-  { l: 'غ', t: 'Ghayn', an: ['غَزَال', 'Deer', '🦌'], ev: [['غَسَّالَة', 'Washing Machine', '🧺'], ['غُرَاب', 'Crow', '🐦‍⬛']], h: [['غَ','gha','غَزَال','غَفُور'], ['غِ','ghi','غِرْبَان','غِشَاوَة'], ['غُ','ghu','غُرَاب','غُرَف']], n: "Ghayn has a dot, sitting up high!\nLike a fast Ghazal, running right by!" },
-  { l: 'ف', t: 'Faa', an: ['فِيل', 'Elephant', '🐘'], ev: [['فَرَاشَة', 'Butterfly', '🦋'], ['فَم', 'Mouth', '👄']], h: [['فَ','fa','فَرَاشَة','فَلَق'], ['فِ','fi','فِيل','فِرْعَوْن'], ['فُ','fu','فُرْشَاة','فُرَات']], n: "Faa has a circle, and one single dot!\nA big grey Feel, eating a lot!" },
-  { l: 'ق', t: 'Qaaf', an: ['قِرْد', 'Monkey', '🐒'], ev: [['قَمَر', 'Moon', '🌙'], ['قِطَار', 'Train', '🚂']], h: [['قَ','qa','قَمَر','قَلَم'], ['قِ','qi','قِرْد','قِبْلَة'], ['قُ','qu','قُبَّة','قُرْآن']], n: "Qaaf goes deep, with dots one and two!\nA silly little Qird, swinging at the zoo!" },
-  { l: 'ك', t: 'Kaaf', an: ['كَلْب', 'Dog', '🐕'], ev: [['كِتَاب', 'Book', '📖'], ['كُرَة', 'Ball', '⚽']], h: [['كَ','ka','كَلْب','كَوْثَر'], ['كِ','ki','كِتَاب','كِتَاب'], ['كُ','ku','كُرَة','كُتِبَ']], n: "Kaaf has a small shape, resting inside!\nReading a Kitab, with pages so wide!" },
-  { l: 'ل', t: 'Laam', an: ['لَيْمُون', 'Lemon', '🍋'], ev: [['لَحْم', 'Meat', '🥩'], ['لِسَان', 'Tongue', '👅']], h: [['لَ','la','لَيْمُون','لَيْل'], ['لِ','li','لِسَان','لِبَاس'], ['لُ','lu','لُؤْلُؤ','لُؤْلُؤ']], n: "Laam is a hook, reaching so long!\nTasting sour Laymoon, singing a song!" },
-  { l: 'م', t: 'Meem', an: ['مَوْز', 'Banana', '🍌'], ev: [['مَسْجِد', 'Mosque', '🕌'], ['مِفْتَاح', 'Key', '🔑']], h: [['مَ','ma','مَوْز','مَسَد'], ['مِ','mi','مِفْتَاح','مِصْر'], ['مُ','mu','مُصْحَف','مُحَمَّد']], n: "Meem has a circle, and a tail dropping down!\nEating yellow Mawz, the best in town!" },
-  { l: 'ن', t: 'Noon', an: ['نَمِر', 'Tiger', '🐅'], ev: [['نَجْم', 'Star', '⭐'], ['نَحْلَة', 'Bee', '🐝']], h: [['نَ','na','نَجْم','نَار'], ['نِ','ni','نِصْف','نِسَاء'], ['نُ','nu','نُور','نُور']], n: "Noon is a bowl, with a dot in the middle!\nA striped fierce Namir, solving a riddle!" },
-  { l: 'ه', t: 'Haa', an: ['هُدْهُد', 'Hoopoe', '🐦'], ev: [['هِلَال', 'Crescent', '🌙'], ['هَدِيَّة', 'Gift', '🎁']], h: [['هَ','ha','هَدِيَّة','هَذَا'], ['هِ','hi','هِلَال','هِدَايَة'], ['هُ','hu','هُدْهُد','هُدًى']], n: "Haa has two loops, tied in a bow!\nA flying little Hudhud, putting on a show!" },
-  { l: 'و', t: 'Waw', an: ['وَرْدَة', 'Flower', '🌹'], ev: [['وَرَقَة', 'Leaf', '🍃'], ['وَجْه', 'Face', '👦']], h: [['وَ','wa','وَرْدَة','وَقْت'], ['وِ','wi','وِسَادَة','وِجْهَة'], ['وُ','wu','وُجُوه','وُجُوه']], n: "Waw is a circle, curving down to the floor!\nA beautiful Wardah, growing by the door!" },
-  { l: 'ي', t: 'Yaa', an: ['يَد', 'Hand', '✋'], ev: [['يَوْم', 'Day', '☀️'], ['يُوسُفِي', 'Tangerine', '🍊']], h: [['يَ','ya','يَد','يَوْم'], ['يِ','yi','يِنْبُوع','قِيلَ'], ['يُ','yu','يُوسُفِي','يُوسُف']], n: "Yaa is like a duck, with two dots below!\nWaving with my Yad, saying hello!" }
-];
-
-const COLORS = [
-  { color: 'bg-red-100', accent: 'bg-red-500', textAccent: 'text-red-500', borderAccent: 'border-red-500' },
-  { color: 'bg-blue-100', accent: 'bg-blue-500', textAccent: 'text-blue-500', borderAccent: 'border-blue-500' },
-  { color: 'bg-green-100', accent: 'bg-green-500', textAccent: 'text-green-500', borderAccent: 'border-green-500' },
-  { color: 'bg-yellow-100', accent: 'bg-yellow-500', textAccent: 'text-yellow-600', borderAccent: 'border-yellow-500' },
-  { color: 'bg-purple-100', accent: 'bg-purple-500', textAccent: 'text-purple-500', borderAccent: 'border-purple-500' },
-  { color: 'bg-pink-100', accent: 'bg-pink-500', textAccent: 'text-pink-500', borderAccent: 'border-pink-500' },
-  { color: 'bg-indigo-100', accent: 'bg-indigo-500', textAccent: 'text-indigo-500', borderAccent: 'border-indigo-500' },
-  { color: 'bg-teal-100', accent: 'bg-teal-500', textAccent: 'text-teal-500', borderAccent: 'border-teal-500' },
-  { color: 'bg-orange-100', accent: 'bg-orange-500', textAccent: 'text-orange-500', borderAccent: 'border-orange-500' }
-];
-
-const stripHarakat = (str) => str.replace(/[\u064B-\u065F]/g, '');
-const ALL_WORDS = RAW_DATA.flatMap(d => [d.an[0], d.ev[0][0], d.ev[1][0]]);
-
-const LESSONS = RAW_DATA.map((d, index) => {
-  const c = COLORS[index % COLORS.length];
-  return {
-    id: index + 1,
-    letter: d.l,
-    title: d.t,
-    ...c,
-    animal: { word: d.an[0], english: d.an[1], icon: d.an[2] },
-    everyday: [
-      { word: d.ev[0][0], english: d.ev[0][1], icon: d.ev[0][2] },
-      { word: d.ev[1][0], english: d.ev[1][1], icon: d.ev[1][2] }
-    ],
-    harakat: d.h.map((hItem, hIdx) => {
-      let shape = '';
-      if(hIdx === 0) shape = 'َ';
-      else if(hIdx === 1) shape = 'ِ';
-      else shape = 'ُ';
-      
-      return {
-        sound: hItem[0], label: hItem[1], example: hItem[2], quran: hItem[3], shape: shape
-      }
-    }),
-    nasheed: d.n
-  };
-});
-
-// --- STATE ---
-let currentLessonIdx = 0;
-let currentTab = 0; 
-let isDrawing = false;
-let canvasCtx = null;
-let currentAudio = null;
-
-// --- DOM ELEMENTS ---
-const sidebarList = document.getElementById('sidebar-list');
-const tabsContainer = document.getElementById('tabs-container');
-const contentBody = document.getElementById('content-body');
-const btnPrev = document.getElementById('btn-prev');
-const btnNext = document.getElementById('btn-next');
-const scrollArea = document.getElementById('main-scroll-area');
-
-// --- AUDIO LOGIC ---
-function playSound(text, btnElement) {
-    if(btnElement) {
-        btnElement.classList.add('scale-95');
-        setTimeout(() => btnElement.classList.remove('scale-95'), 150);
-    }
-
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-    }
-    window.speechSynthesis.cancel();
-
-    const speakText = () => {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-            const arabicVoice = voices.find(voice => voice.lang.includes('ar'));
-            if (arabicVoice) utterance.voice = arabicVoice;
-            utterance.lang = 'ar-SA'; 
-            utterance.rate = 0.8; 
-            utterance.pitch = 1.2; 
-            window.speechSynthesis.speak(utterance);
-        }
-    };
-
-    try {
-        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=ar&client=tw-ob`;
-        currentAudio = new Audio(audioUrl);
-        currentAudio.play().catch(error => {
-            speakText(); 
-        });
-    } catch (e) {
-        speakText(); 
-    }
-}
-
-window.speechSynthesis.onvoiceschanged = () => {
-    window.speechSynthesis.getVoices();
-};
-
-function triggerVibration() {
-    if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100]);
-    }
-}
-
-// --- RENDER FUNCTIONS ---
-
-function renderSidebar() {
-    sidebarList.innerHTML = LESSONS.map((l, idx) => `
-        <button onclick="changeLesson(${idx})" id="sidebar-btn-${idx}"
-            class="snap-center flex-none w-48 md:w-auto flex items-center justify-between p-3 rounded-xl border-2 transition-all 
-            ${currentLessonIdx === idx 
-                ? `active-lesson ${l.borderAccent} ${l.color} shadow-md scale-100 md:scale-105 ml-0 md:ml-2` 
-                : 'border-transparent hover:bg-gray-50'}">
-            <div class="flex flex-col items-start text-left">
-                <span class="text-xs font-medium text-gray-500">Lesson ${l.id}</span>
-                <span class="text-lg font-bold">${l.title}</span>
-            </div>
-            <span class="text-3xl font-bold arabic-text ${currentLessonIdx === idx ? l.textAccent : 'text-gray-300'}" dir="rtl">
-                ${l.letter}
-            </span>
-        </button>
-    `).join('');
-    
-    setTimeout(() => {
-        const activeBtn = document.querySelector('.active-lesson');
-        if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }, 50);
-}
-
-function renderTabs() {
-    const tabs = [
-        { label: 'Meet It', icon: 'book-open' },
-        { label: 'Sounds', icon: 'play-circle' },
-        { label: 'Play!', icon: 'mouse-pointer-2' }
-    ];
-    const lesson = LESSONS[currentLessonIdx];
-    
-    tabsContainer.innerHTML = tabs.map((tab, idx) => `
-        <button onclick="changeTab(${idx})"
-            class="flex flex-col items-center p-2 md:px-6 md:py-3 rounded-2xl transition-all flex-1 md:flex-none 
-            ${currentTab === idx ? `${lesson.color} ${lesson.textAccent} shadow-inner` : 'text-gray-500 hover:bg-gray-100'}">
-            <i data-lucide="${tab.icon}" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs md:text-sm font-bold">${idx + 1}. ${tab.label}</span>
-        </button>
-    `).join('');
-    
-    lucide.createIcons();
-}
-
-function renderMainContent() {
-    const lesson = LESSONS[currentLessonIdx];
-    let html = '';
-
-    if (currentTab === 0) {
-        html = `
-            <div class="animate-fade-in flex flex-col items-center">
-                <div class="w-full flex justify-between items-center mb-6">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Meet the Letter!</h2>
-                    <div class="hidden md:block px-4 py-2 rounded-full ${lesson.color} ${lesson.textAccent} font-bold text-sm animate-pulse">
-                        Teacher Prompt: "Listen & Repeat!"
-                    </div>
-                </div>
-
-                <div class="flex flex-col md:flex-row items-center justify-center gap-8 w-full mb-10">
-                    <div class="w-48 h-48 md:w-64 md:h-64 flex items-center justify-center rounded-full shadow-xl border-8 border-white ${lesson.color} flex-shrink-0">
-                        <span class="text-[100px] md:text-[150px] font-bold arabic-text ${lesson.textAccent}" dir="rtl">${lesson.letter}</span>
-                    </div>
-                    
-                    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-lg border-2 border-gray-100 text-center w-full md:w-auto min-w-[280px]">
-                        <div class="text-6xl md:text-8xl mb-4">${lesson.animal.icon}</div>
-                        <div class="text-5xl md:text-6xl font-bold mb-2 arabic-text ${lesson.textAccent}" dir="rtl">${lesson.animal.word}</div>
-                        <div class="text-xl md:text-2xl font-medium text-gray-500 uppercase tracking-widest">${lesson.animal.english}</div>
-                        <button onclick="playSound('${lesson.animal.word}', this)" class="mt-6 mx-auto flex items-center justify-center w-14 h-14 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-transform hover:scale-110">
-                            <i data-lucide="volume-2" class="w-6 h-6"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="w-full">
-                    <h3 class="text-lg md:text-xl font-bold text-gray-400 mb-4 text-center uppercase tracking-wider">More Words</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        ${lesson.everyday.map(item => `
-                            <div class="bg-white px-6 py-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-4 hover:shadow-md transition-shadow">
-                                <div class="text-4xl md:text-5xl">${item.icon}</div>
-                                <div class="text-right">
-                                    <div class="text-3xl md:text-4xl font-bold text-gray-800 arabic-text" dir="rtl">${item.word}</div>
-                                    <div class="text-sm md:text-base text-gray-400 font-medium mt-1">${item.english}</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-    } else if (currentTab === 1) {
-        html = `
-            <div class="animate-fade-in flex flex-col items-center w-full">
-                <div class="w-full flex justify-between items-center mb-6">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Learn the Sounds</h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full mb-8">
-                    ${lesson.harakat.map(h => `
-                        <div class="bg-white rounded-3xl shadow-lg overflow-hidden border-t-8 ${lesson.borderAccent}">
-                            <div class="py-6 md:py-8 text-center ${lesson.color}">
-                                <span class="text-7xl md:text-8xl font-bold arabic-text ${lesson.textAccent}" dir="rtl">${h.sound}</span>
-                            </div>
-                            <div class="p-5 text-center">
-                                <div class="text-lg md:text-xl font-bold text-gray-600 mb-2">${h.label}</div>
-                                <div class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 arabic-text" dir="rtl">${h.example}</div>
-                                <button onclick="playSound('${h.sound}', this)" class="w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-white transition-transform active:scale-95 ${lesson.accent}">
-                                    <i data-lucide="volume-2" class="w-5 h-5"></i> Listen
-                                </button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div class="w-full bg-slate-800 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <i data-lucide="book-open" class="w-[100px] h-[100px]"></i>
-                    </div>
-                    <h3 class="text-xl md:text-2xl font-bold mb-6 flex items-center gap-3 relative z-10">
-                        <i data-lucide="star" class="w-6 h-6 text-yellow-400"></i> 
-                        Quran Connection
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-                        ${lesson.harakat.map(h => `
-                            <div class="bg-slate-700/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl border border-slate-600 flex flex-row md:flex-col items-center justify-between md:justify-center text-center gap-4">
-                                <div class="text-3xl md:text-4xl font-bold text-yellow-400 arabic-text" dir="rtl">${h.sound}</div>
-                                <div class="text-2xl md:text-3xl font-bold text-white arabic-text" dir="rtl">${h.quran}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-    } else if (currentTab === 2) {
-        html = `
-            <div class="animate-fade-in flex flex-col items-center w-full gap-8 md:gap-12 pb-8">
-                
-                <!-- DRAG AND DROP GAME -->
-                <div class="w-full bg-indigo-50 p-6 md:p-8 rounded-3xl shadow-lg border-2 border-indigo-200 text-center relative overflow-hidden">
-                    <div class="inline-flex items-center gap-2 bg-white text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6 shadow-sm border border-indigo-100">
-                        <span class="animate-bounce">🧩</span> Match the Vowels!
-                    </div>
-                    <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Drag the vowel to the correct box!</h2>
-                    <p class="text-sm text-gray-500 mb-6">Drag and Drop</p>
-                    
-                    <div id="drag-drop-container" class="flex flex-col items-center gap-8 w-full">
-                        <div class="flex justify-center gap-4 w-full" dir="rtl">
-                            ${lesson.harakat.map((h, idx) => `
-                                <div class="flex flex-col items-center gap-2">
-                                    <div class="text-sm font-bold text-gray-500">${h.label}</div>
-                                    <div class="dropzone w-20 h-24 md:w-24 md:h-28 bg-white border-4 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center relative shadow-inner" data-correct-idx="${idx}" id="dropzone-${idx}">
-                                        <span class="text-5xl md:text-6xl font-bold arabic-text text-gray-300 absolute inset-0 flex items-center justify-center pointer-events-none">${lesson.letter}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-
-                        <div class="flex justify-center gap-6 w-full p-4 bg-white/50 rounded-2xl border border-indigo-100" id="draggables-container" dir="rtl">
-                            <!-- Draggables injected via JS -->
-                        </div>
-                    </div>
-                    
-                    <!-- Success overlay -->
-                    <div id="drag-success-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 hidden flex-col items-center justify-center">
-                        <i data-lucide="star" class="w-20 h-20 text-yellow-400 fill-yellow-400 animate-pop mb-4"></i>
-                        <h2 class="text-3xl font-bold text-indigo-600 arabic-text">Mumtaz!</h2>
-                        <button onclick="initDragAndDrop()" class="mt-6 px-6 py-2 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-700 transition-colors">
-                            Play Again
-                        </button>
-                    </div>
-                </div>
-
-                <!-- DRAWING CANVAS -->
-                <div class="w-full bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 text-center relative overflow-hidden transition-colors duration-300" id="canvas-container">
-                    <div id="drawing-prompt" class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6 shadow-sm border border-indigo-100 transition-colors duration-300">
-                        <span class="animate-bounce" id="prompt-icon">✏️</span> <span id="prompt-text">Teacher Prompt: "Trace the letter carefully!"</span>
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Draw the Letter</h2>
-                    
-                    <div class="flex flex-col items-center gap-4 w-full max-w-md mx-auto">
-                        <div class="relative w-full aspect-square bg-white rounded-3xl shadow-inner border-4 border-dashed border-gray-300 overflow-hidden touch-none">
-                            <canvas id="target-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
-                            <canvas id="drawing-canvas" class="absolute inset-0 w-full h-full cursor-crosshair"></canvas>
-                        </div>
-                        
-                        <div class="flex items-center gap-4 justify-center mt-4 w-full">
-                            <button onclick="clearCanvas()" class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full transition-colors">
-                                <i data-lucide="eraser" class="w-5 h-5"></i> Clear
-                            </button>
-                            <button onclick="checkDrawingStrict()" class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition-colors shadow-md">
-                                <i data-lucide="check-circle" class="w-5 h-5"></i> Check
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Drawing Success Overlay -->
-                    <div id="draw-success-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-md z-10 hidden flex-col items-center justify-center rounded-3xl">
-                        <i data-lucide="star" class="w-24 h-24 text-yellow-400 fill-yellow-400 animate-pop mb-4"></i>
-                        <h2 class="text-4xl font-bold text-green-500 arabic-text">Mumtaz!</h2>
-                        <p class="text-gray-600 mt-2 font-bold text-xl">Perfect Tracing!</p>
-                        <button onclick="resetDrawing()" class="mt-8 px-8 py-3 bg-green-500 text-white font-bold rounded-full hover:bg-green-600 transition-colors shadow-md">
-                            Draw Again
-                        </button>
-                    </div>
-                </div>
-
-                <!-- HIDE AND SEEK -->
-                <div class="${lesson.color} w-full p-6 md:p-8 rounded-3xl shadow-lg text-center">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Hide and Seek! 🔍</h2>
-                    <p class="text-sm md:text-base text-gray-600 font-medium mb-6">Can you find the words that have the letter <strong class="text-xl md:text-2xl arabic-text">${lesson.letter}</strong> in them?</p>
-                    <div id="hide-and-seek-container" class="flex flex-wrap justify-center gap-4 p-4">
-                        <!-- Game injected here -->
-                    </div>
-                </div>
-
-                <!-- NASHEED -->
-                <div class="w-full bg-yellow-50 p-6 md:p-8 rounded-3xl border-2 border-yellow-200 text-center shadow-sm">
-                    <h2 class="text-xl md:text-2xl font-bold text-yellow-700 mb-3 flex items-center justify-center gap-2">
-                        🎵 Sing Along!
-                    </h2>
-                    <p class="text-lg md:text-xl text-gray-700 font-medium leading-loose whitespace-pre-line">${lesson.nasheed}</p>
-                </div>
-
-            </div>
-        `;
-    }
-
-    contentBody.innerHTML = html;
-    lucide.createIcons();
-
-    if (currentTab === 2) {
-        setTimeout(() => {
-            initCanvas();
-            initHideAndSeekGame();
-            initDragAndDrop();
-        }, 100);
-    }
-}
-
-// --- LOGIC: DRAG AND DROP GAME ---
-let completedDrops = 0;
-
-function initDragAndDrop() {
-    const lesson = LESSONS[currentLessonIdx];
-    const container = document.getElementById('draggables-container');
-    const overlay = document.getElementById('drag-success-overlay');
-    const dropzones = document.querySelectorAll('.dropzone');
-    
-    overlay.classList.add('hidden');
-    overlay.classList.remove('flex');
-    completedDrops = 0;
-
-    dropzones.forEach(dz => {
-        dz.innerHTML = `<span class="text-5xl md:text-6xl font-bold arabic-text text-gray-300 absolute inset-0 flex items-center justify-center pointer-events-none">${lesson.letter}</span>`;
-        dz.classList.remove('bg-green-50', 'border-green-400', 'draggable-placed');
-        dz.classList.add('border-gray-300', 'border-dashed');
-    });
-
-    let draggablesData = lesson.harakat.map((h, idx) => ({ idx: idx, shape: h.shape }));
-    draggablesData = draggablesData.sort(() => Math.random() - 0.5);
-
-    container.innerHTML = draggablesData.map(d => `
-        <div class="draggable w-16 h-16 md:w-20 md:h-20 bg-white shadow-md border-2 border-indigo-200 rounded-xl flex items-center justify-center text-4xl md:text-5xl font-bold arabic-text text-indigo-600 hover:scale-110 hover:shadow-lg transition-transform z-20" 
-             draggable="true" 
-             data-idx="${d.idx}" 
-             id="drag-${d.idx}">
-            <span class="pointer-events-none leading-none">&#x25CC;${d.shape}</span>
-        </div>
-    `).join('');
-
-    setupDragEvents();
-}
-
-function setupDragEvents() {
-    const draggables = document.querySelectorAll('.draggable');
-    const dropzones = document.querySelectorAll('.dropzone');
-    
-    let draggedItem = null;
-    let initialTransform = '';
-
-    draggables.forEach(draggable => {
-        draggable.addEventListener('dragstart', (e) => {
-            draggedItem = draggable;
-            setTimeout(() => draggable.classList.add('is-dragging'), 0);
-            e.dataTransfer.setData('text/plain', draggable.dataset.idx);
-        });
-
-        draggable.addEventListener('dragend', () => {
-            draggable.classList.remove('is-dragging');
-            draggedItem = null;
-        });
-    });
-
-    dropzones.forEach(zone => {
-        zone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if(!zone.classList.contains('draggable-placed')) {
-                zone.classList.add('dragover');
-            }
-        });
-
-        zone.addEventListener('dragleave', () => {
-            zone.classList.remove('dragover');
-        });
-
-        zone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            zone.classList.remove('dragover');
-            const draggedIdx = e.dataTransfer.getData('text/plain');
-            handleDrop(zone, draggedIdx, document.querySelector(`[data-idx="${draggedIdx}"]`));
-        });
-    });
-
-    draggables.forEach(draggable => {
-        draggable.addEventListener('touchstart', (e) => {
-            draggedItem = draggable;
-            const touch = e.touches[0];
-            initialTransform = draggable.style.transform;
-            draggable.style.position = 'absolute';
-            draggable.style.zIndex = '100';
-            document.body.appendChild(draggable);
-            moveElement(draggable, touch.clientX, touch.clientY);
-        }, {passive: false});
-
-        draggable.addEventListener('touchmove', (e) => {
-            e.preventDefault(); 
-            if (!draggedItem) return;
-            const touch = e.touches[0];
-            moveElement(draggedItem, touch.clientX, touch.clientY);
-            
-            dropzones.forEach(zone => {
-                const rect = zone.getBoundingClientRect();
-                if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-                    touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-                    if(!zone.classList.contains('draggable-placed')) zone.classList.add('dragover');
-                } else {
-                    zone.classList.remove('dragover');
-                }
-            });
-        }, {passive: false});
-
-        draggable.addEventListener('touchend', (e) => {
-            if (!draggedItem) return;
-            const touch = e.changedTouches[0];
-            let droppedOnValidZone = false;
-
-            dropzones.forEach(zone => {
-                const rect = zone.getBoundingClientRect();
-                if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-                    touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-                    
-                    if(!zone.classList.contains('draggable-placed')) {
-                        handleDrop(zone, draggedItem.dataset.idx, draggedItem, true);
-                        droppedOnValidZone = true;
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1e40af', // Blue-800
+                        secondary: '#475569', // Slate-600
+                        light: '#f8fafc', // Slate-50
                     }
                 }
-                zone.classList.remove('dragover');
-            });
-
-            if (!droppedOnValidZone) {
-                draggedItem.style.position = 'relative';
-                draggedItem.style.left = 'auto';
-                draggedItem.style.top = 'auto';
-                draggedItem.style.transform = initialTransform;
-                document.getElementById('draggables-container').appendChild(draggedItem);
             }
-            draggedItem = null;
-        });
-    });
-}
-
-function moveElement(el, clientX, clientY) {
-    el.style.left = (clientX - el.offsetWidth / 2) + 'px';
-    el.style.top = (clientY - el.offsetHeight / 2) + 'px';
-}
-
-function handleDrop(zone, draggedIdx, element, isTouch = false) {
-    const targetIdx = zone.dataset.correctIdx;
-    const targetIdxNumber = parseInt(targetIdx, 10);
-    const draggedIdxNumber = parseInt(draggedIdx, 10);
-    
-    if (draggedIdxNumber === targetIdxNumber) {
-        playSound('صَحِيح', null);
-        const lesson = LESSONS[currentLessonIdx];
-        
-        zone.innerHTML = `
-            <span class="text-5xl md:text-6xl font-bold arabic-text text-indigo-600 absolute inset-0 flex items-center justify-center pointer-events-none animate-pop">${lesson.harakat[targetIdxNumber].sound}</span>
-            <span class="absolute -top-4 -right-4 text-yellow-400 animate-bounce-star z-50"><i data-lucide="star" class="w-10 h-10 fill-current"></i></span>
-        `;
-        
-        zone.classList.add('bg-green-50', 'border-green-400', 'draggable-placed');
-        zone.classList.remove('border-gray-300', 'border-dashed');
-        
-        element.remove(); 
-        lucide.createIcons();
-        
-        setTimeout(() => { playSound(lesson.harakat[targetIdxNumber].sound, null); }, 800);
-
-        completedDrops++;
-        if (completedDrops === 3) {
-            setTimeout(() => {
-                const overlay = document.getElementById('drag-success-overlay');
-                overlay.classList.remove('hidden');
-                overlay.classList.add('flex');
-                playSound('مُمْتَاز', null); 
-            }, 1000);
         }
-    } else {
-        triggerVibration();
-        zone.classList.add('border-red-400', 'bg-red-50');
-        setTimeout(() => {
-            zone.classList.remove('border-red-400', 'bg-red-50');
-        }, 500);
-
-        if (isTouch) {
-            element.style.position = 'relative';
-            element.style.left = 'auto';
-            element.style.top = 'auto';
-            document.getElementById('draggables-container').appendChild(element);
+    </script>
+    <style>
+        /* Custom styles for print media to make the site double as a printable CV */
+        @media print {
+            nav, .no-print { display: none !important; }
+            body { background-color: white !important; color: black !important; }
+            section { page-break-inside: avoid; padding: 1rem 0 !important; }
+            .print-text-sm { font-size: 0.875rem !important; }
+            .shadow-sm, .shadow-md, .hover\:shadow-xl { box-shadow: none !important; border: 1px solid #e2e8f0; }
         }
-    }
-}
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-primary selection:text-white">
 
-// --- LOGIC: HIDEN AND SEEK ---
-function initHideAndSeekGame() {
-    const lesson = LESSONS[currentLessonIdx];
-    const container = document.getElementById('hide-and-seek-container');
-    
-    const correctWords = [lesson.animal.word, lesson.everyday[0].word];
-    const wrongWords = [];
-    
-    while(wrongWords.length < 3) {
-      const randomWord = ALL_WORDS[Math.floor(Math.random() * ALL_WORDS.length)];
-      if (!stripHarakat(randomWord).includes(stripHarakat(lesson.letter)) && !wrongWords.includes(randomWord)) {
-        wrongWords.push(randomWord);
-      }
-    }
-    
-    const gameWords = [
-      ...correctWords.map(w => ({ word: w, hasLetter: true })), 
-      ...wrongWords.map(w => ({ word: w, hasLetter: false }))
-    ].sort(() => Math.random() - 0.5);
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="#" class="text-xl font-bold text-primary tracking-tight">JUNAID.</a>
+                </div>
+                <div class="hidden lg:flex space-x-8">
+                    <a href="#about" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">About</a>
+                    <a href="#skills" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Skills</a>
+                    <a href="#experience" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Experience</a>
+                    <a href="#projects" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Projects</a>
+                    <a href="#education" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Education</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.print()" class="hidden md:flex items-center text-sm font-medium text-slate-600 hover:text-primary transition-colors no-print">
+                        <i data-lucide="printer" class="w-4 h-4 mr-1"></i> Print CV
+                    </button>
+                    <a href="mailto:abdjunaidkv@gmail.com" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        Hire Me
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-    container.innerHTML = gameWords.map((item, index) => `
-        <button id="hs-btn-${index}" data-correct="${item.hasLetter}" onclick="handleHideSeekClick(${index}, ${item.hasLetter}, '${lesson.accent}')"
-            class="relative text-2xl sm:text-4xl font-bold arabic-text p-4 sm:p-6 rounded-2xl shadow-sm border-2 transition-all duration-300 transform bg-white text-gray-800 hover:bg-gray-50 border-gray-200" dir="rtl">
-            ${item.word}
-        </button>
-    `).join('');
-}
+    <!-- Hero Section -->
+    <section id="hero" class="relative bg-white overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-28">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center md:text-left flex flex-col md:flex-row items-center gap-12">
+                <!-- Profile Image -->
+                <img src="profile.jpg" alt="Junaid Profile Photo" class="w-40 h-40 md:w-48 md:h-48 rounded-full border-4 border-white shadow-xl flex-shrink-0 object-cover">
+                
+                <div class="flex-1">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 mb-4">
+                        Hi, I'm <span class="text-primary">Junaid</span>
+                    </h1>
+                    <h2 class="text-xl md:text-2xl font-medium text-slate-600 mb-6">
+                        Educator | Office Administrator | Islamic Scholar
+                    </h2>
+                    
+                    <div class="flex flex-col sm:flex-row flex-wrap items-center md:items-start justify-center md:justify-start gap-4 text-slate-600 mb-4">
+                        <div class="flex items-center">
+                            <i data-lucide="map-pin" class="w-5 h-5 mr-2 text-primary"></i>
+                            Kozhikode, Kerala, India
+                        </div>
+                        <div class="hidden sm:block text-slate-300">|</div>
+                        <div class="flex items-center">
+                            <i data-lucide="mail" class="w-5 h-5 mr-2 text-primary"></i>
+                            <a href="mailto:abdjunaidkv@gmail.com" class="hover:text-primary transition-colors">abdjunaidkv@gmail.com</a>
+                        </div>
+                        <div class="hidden sm:block text-slate-300">|</div>
+                        <div class="flex items-center">
+                            <i data-lucide="phone" class="w-5 h-5 mr-2 text-primary"></i>
+                            <a href="tel:+919645555771" class="hover:text-primary transition-colors">+91 964 5555 771</a>
+                        </div>
+                    </div>
 
-function handleHideSeekClick(index, isCorrect, accentClass) {
-    const btn = document.getElementById(`hs-btn-${index}`);
-    if (btn.disabled) return;
-    
-    if (isCorrect) {
-        btn.className = `relative text-2xl sm:text-4xl font-bold arabic-text p-4 sm:p-6 rounded-2xl shadow-sm border-2 transition-all duration-300 transform ${accentClass} text-white border-transparent scale-110`;
-        btn.disabled = true;
-        btn.innerHTML += `<span class="absolute -top-3 -right-3 text-yellow-400 animate-bounce-star"><i data-lucide="star" class="w-8 h-8 fill-current"></i></span>`;
-        lucide.createIcons();
-        playSound('صَحِيح', null); 
-    } else {
-        triggerVibration(); 
-        btn.className = `relative text-2xl sm:text-4xl font-bold arabic-text p-4 sm:p-6 rounded-2xl shadow-sm border-2 transition-all duration-300 transform bg-gray-100 text-gray-400 border-gray-200 opacity-50`;
-        btn.disabled = true;
-    }
-}
+                    <!-- Social Links (Using Native SVGs so they never fail to load) -->
+                    <div class="flex items-center justify-center md:justify-start space-x-5 mb-8 no-print">
+                        <a href="https://www.linkedin.com/in/junaid-kayakkodi-1789b5291" target="_blank" class="text-slate-400 hover:text-[#0a66c2] transition-colors" aria-label="LinkedIn">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        <a href="https://www.instagram.com/abd_kv" target="_blank" class="text-slate-400 hover:text-[#E1306C] transition-colors" aria-label="Instagram">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd"/></svg>
+                        </a>
+                    </div>
+                    
+                    <div class="flex justify-center md:justify-start space-x-4 no-print">
+                        <a href="#contact" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-slate-900 hover:bg-slate-800 transition-colors">
+                            Contact Me
+                        </a>
+                        <a href="#projects" class="inline-flex items-center px-6 py-3 border border-slate-300 text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+                            View Projects
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-// --- LOGIC: CANVAS SMART GRID VALIDATION ---
-function initCanvas() {
-    const canvas = document.getElementById('drawing-canvas');
-    const targetCanvas = document.getElementById('target-canvas');
-    if (!canvas || !targetCanvas) return;
-    
-    canvasCtx = canvas.getContext('2d');
-    const targetCtx = targetCanvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    
-    canvas.width = rect.width * 2;
-    canvas.height = rect.height * 2;
-    targetCanvas.width = rect.width * 2;
-    targetCanvas.height = rect.height * 2;
-    
-    canvasCtx.scale(2, 2);
-    canvasCtx.lineCap = 'round';
-    canvasCtx.lineJoin = 'round';
-    canvasCtx.lineWidth = 24; 
-    canvasCtx.strokeStyle = '#4F46E5'; 
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Professional Summary</h2>
+                <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 md:p-10 text-lg leading-relaxed text-slate-600 print-text-sm">
+                <p>
+                    Versatile, highly organized, and dedicated professional with a robust background encompassing academic instruction, office administration, and Islamic theology. Proven track record in spearheading data digitalization, managing digital operational systems, and optimizing administrative workflows. 
+                </p>
+                <p class="mt-4">
+                    Highly adept at creating engaging learning environments, developing curriculum-based instructional plans, and fostering student character development (Tarbiyah). Brings combined expertise in financial record-keeping, multi-committee leadership, and digital platform management to drive efficiency and holistic growth in diverse, fast-paced educational and corporate environments.
+                </p>
+            </div>
+        </div>
+    </section>
 
-    targetCtx.scale(2, 2);
-    targetCtx.clearRect(0, 0, rect.width, rect.height);
-    targetCtx.textAlign = 'center';
-    targetCtx.textBaseline = 'middle';
-    
-    const isSmallScreen = window.innerWidth < 640;
-    const fontSize = isSmallScreen ? 180 : 250;
-    targetCtx.font = `bold ${fontSize}px "Noto Kufi Arabic", sans-serif`;
-    targetCtx.fillStyle = '#E5E7EB'; 
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    targetCtx.fillText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
-
-    canvas.onmousedown = startDrawing;
-    canvas.onmousemove = draw;
-    canvas.onmouseup = stopDrawing;
-    canvas.onmouseleave = stopDrawing;
-    
-    canvas.ontouchstart = (e) => { e.preventDefault(); startDrawing(e); };
-    canvas.ontouchmove = (e) => { e.preventDefault(); draw(e); };
-    canvas.ontouchend = stopDrawing;
-}
-
-function showDrawingError(msg) {
-    triggerVibration();
-    const canvasContainer = document.getElementById('canvas-container');
-    const prompt = document.getElementById('drawing-prompt');
-    const promptIcon = document.getElementById('prompt-icon');
-    const promptText = document.getElementById('prompt-text');
-    
-    canvasContainer.classList.add('border-red-400');
-    
-    if(prompt && promptIcon && promptText) {
-        prompt.classList.replace('bg-indigo-100', 'bg-red-100');
-        prompt.classList.replace('text-indigo-700', 'text-red-700');
-        prompt.classList.replace('border-indigo-100', 'border-red-200');
-        promptIcon.innerText = '❌';
-        promptIcon.classList.remove('animate-bounce');
-        promptText.innerText = msg;
-        
-        setTimeout(() => {
-            prompt.classList.replace('bg-red-100', 'bg-indigo-100');
-            prompt.classList.replace('text-red-700', 'text-indigo-700');
-            prompt.classList.replace('border-red-200', 'border-indigo-100');
-            promptIcon.innerText = '✏️';
-            promptIcon.classList.add('animate-bounce');
-            promptText.innerText = 'Teacher Prompt: "Trace the letter carefully!"';
-        }, 3000);
-    }
-    
-    setTimeout(() => canvasContainer.classList.remove('border-red-400'), 500);
-}
-
-function checkDrawingStrict() {
-    const canvas = document.getElementById('drawing-canvas');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-    const rect = canvas.getBoundingClientRect();
-
-    const userData = ctx.getImageData(0, 0, width, height).data;
-    
-    const hiddenCanvas = document.createElement('canvas');
-    hiddenCanvas.width = width;
-    hiddenCanvas.height = height;
-    const hiddenCtx = hiddenCanvas.getContext('2d');
-    
-    hiddenCtx.scale(2, 2);
-    hiddenCtx.textAlign = 'center';
-    hiddenCtx.textBaseline = 'middle';
-    const isSmallScreen = window.innerWidth < 640;
-    const fontSize = isSmallScreen ? 180 : 250;
-    hiddenCtx.font = `bold ${fontSize}px "Noto Kufi Arabic", sans-serif`;
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    // 1. FAT HITBOX (Checks if they drew outside the lines)
-    hiddenCtx.lineJoin = 'round';
-    hiddenCtx.lineCap = 'round';
-    hiddenCtx.lineWidth = 70; // Extremely forgiving fat boundary
-    hiddenCtx.strokeStyle = 'black';
-    hiddenCtx.strokeText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
-    hiddenCtx.fillStyle = 'black';
-    hiddenCtx.fillText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
-    const fatData = hiddenCtx.getImageData(0, 0, width, height).data;
-
-    // 2. NORMAL HITBOX (Used to map out the required grid path)
-    hiddenCtx.clearRect(0, 0, width, height);
-    hiddenCtx.fillText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
-    const normalData = hiddenCtx.getImageData(0, 0, width, height).data;
-
-    let userPixels = 0;
-    let userInsideFat = 0;
-    
-    // Smart Grid System (25px blocks) perfectly verifies path tracking
-    const CELL_SIZE = 25; 
-    const targetZones = new Set();
-    const userZones = new Set();
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const i = (y * width + x) * 4 + 3;
-            const hasUser = userData[i] > 10;
-            const hasTarget = normalData[i] > 10;
+    <!-- Skills Section -->
+    <section id="skills" class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Core Competencies & Skills</h2>
+                <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+            </div>
             
-            if (hasUser) {
-                userPixels++;
-                if (fatData[i] > 10) userInsideFat++;
-                userZones.add(Math.floor(x / CELL_SIZE) + ',' + Math.floor(y / CELL_SIZE));
-            }
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Skill Category 1 -->
+                <div class="bg-slate-50 rounded-xl p-6 border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="p-2 bg-blue-100 rounded-lg text-primary mr-3">
+                            <i data-lucide="book-open" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Education & Theology</h3>
+                    </div>
+                    <ul class="space-y-2 text-slate-600 text-sm">
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Curriculum Development</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Lesson Planning</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Islamic Theology (Wafy)</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Moral Education (Tarbiyah)</li>
+                    </ul>
+                </div>
+
+                <!-- Skill Category 2 -->
+                <div class="bg-slate-50 rounded-xl p-6 border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="p-2 bg-blue-100 rounded-lg text-primary mr-3">
+                            <i data-lucide="briefcase" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Administration</h3>
+                    </div>
+                    <ul class="space-y-2 text-slate-600 text-sm">
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Workplace Management</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Operational Scheduling</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Financial Admin & Bookkeeping</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Logistics Coordination</li>
+                    </ul>
+                </div>
+
+                <!-- Skill Category 3 -->
+                <div class="bg-slate-50 rounded-xl p-6 border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="p-2 bg-blue-100 rounded-lg text-primary mr-3">
+                            <i data-lucide="laptop" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Tech & Data</h3>
+                    </div>
+                    <ul class="space-y-2 text-slate-600 text-sm">
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> MS Office Suite (Advanced)</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Google Workspace & Zoom</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Tally Software</li>
+                        <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mr-2 mt-0.5"></i> Data Digitalization</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Soft Skills & Languages -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center"><i data-lucide="users" class="w-5 h-5 mr-2 text-primary"></i> Soft Skills</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">Problem-Solving</span>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">Public Speaking</span>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">Empathy</span>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">Conflict Resolution</span>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">Leadership</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center"><i data-lucide="languages" class="w-5 h-5 mr-2 text-primary"></i> Languages</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-sm font-medium">Malayalam (Native)</span>
+                        <span class="px-3 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-full text-sm font-medium">English (Proficient)</span>
+                        <span class="px-3 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-full text-sm font-medium">Arabic (Functional)</span>
+                        <span class="px-3 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-full text-sm font-medium">Urdu/Hindi (Basic)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Professional Experience</h2>
+                <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Job Card 1 -->
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Islamic Educator & Administrator</h3>
+                            <p class="text-primary font-medium text-sm md:text-base mt-1">Nibrasul Islam Secondary Madrasa, Mokeri</p>
+                        </div>
+                        <span class="inline-block mt-2 md:mt-0 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200">
+                            March 2026 – Present
+                        </span>
+                    </div>
+                    <ul class="list-disc list-outside ml-5 text-slate-600 space-y-2 text-sm md:text-base print-text-sm">
+                        <li>Deliver comprehensive, curriculum-based Islamic instruction, adapting teaching methodologies to meet diverse academic needs.</li>
+                        <li>Facilitate a values-oriented classroom environment encouraging active discussion and moral reflection.</li>
+                        <li>Conduct regular student assessments and provide constructive feedback to parents.</li>
+                        <li>Spearhead data entry, record-keeping, and general administrative coordination for the institution.</li>
+                    </ul>
+                </div>
+
+                <!-- Job Card 2 -->
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Teacher & Digital Administrator</h3>
+                            <p class="text-primary font-medium text-sm md:text-base mt-1">Hidayathul Islam Higher Secondary Madrasa, Orkkatteri</p>
+                        </div>
+                        <span class="inline-block mt-2 md:mt-0 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200">
+                            June 2025 – March 2026
+                        </span>
+                    </div>
+                    <ul class="list-disc list-outside ml-5 text-slate-600 space-y-2 text-sm md:text-base print-text-sm">
+                        <li>Designed and delivered dynamic lesson plans across subjects, fostering a positive classroom environment.</li>
+                        <li>Spearheaded a complete institutional migration to digital records, improving data entry accuracy and operational speed.</li>
+                        <li>Developed a custom online data management and exam results tracking system to streamline grading.</li>
+                        <li>Coordinated schedules, managed internal communications, and tracked institutional progress parameters.</li>
+                    </ul>
+                </div>
+
+                <!-- Job Card 3 -->
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Accounting Trainee</h3>
+                            <p class="text-primary font-medium text-sm md:text-base mt-1">Al Ameen Accounting Services, Kuttiady</p>
+                        </div>
+                        <span class="inline-block mt-2 md:mt-0 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200">
+                            Dec 2025 – March 2026
+                        </span>
+                    </div>
+                    <ul class="list-disc list-outside ml-5 text-slate-600 space-y-2 text-sm md:text-base print-text-sm">
+                        <li>Maintained flawless day-to-day financial records and ledgers utilizing professional Tally software and Microsoft Excel.</li>
+                        <li>Applied fundamental accounting principles to systematically track assets, liabilities, and balance entries.</li>
+                        <li>Developed core practical expertise in professional workplace administration and corporate data management.</li>
+                    </ul>
+                </div>
+                
+                <!-- Collapsible older experience container -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-200">
+                    <!-- Older Job 1 -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-100">
+                        <h4 class="font-bold text-slate-800">Travel Consultant & E-Seva Asst.</h4>
+                        <p class="text-xs text-primary mb-3">Malabar Travels | Jul 2025 – Nov 2025</p>
+                        <p class="text-sm text-slate-600">Managed business accounts, balanced daily cash transactions. Spearheaded online data entry for public e-services, passport applications, and coordinated complex travel logistics.</p>
+                    </div>
+                    <!-- Older Job 2 -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-100">
+                        <h4 class="font-bold text-slate-800">Sub Editor & Digital Assistant</h4>
+                        <p class="text-xs text-primary mb-3">Campus Journal | Dec 2023 – May 2025</p>
+                        <p class="text-sm text-slate-600">Managed content workflows and daily operations of the digital platform. Collaborated directly with external contributors and edited critical documentation.</p>
+                    </div>
+                    <!-- Older Job 3 -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-100 md:col-span-2">
+                        <h4 class="font-bold text-slate-800">College Union Secretary</h4>
+                        <p class="text-xs text-primary mb-3">MTM Wafy College, Chokli | 2022 – 2023</p>
+                        <p class="text-sm text-slate-600">Directed administrative functions of the central student body, executing diverse initiatives. Streamlined communication lines across multiple independent committees.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Projects & Developments</h2>
+                <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Project 1 -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="p-3 bg-blue-100 w-12 h-12 rounded-xl text-primary mb-6 flex items-center justify-center">
+                        <i data-lucide="monitor" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Online Result Portal</h3>
+                    <p class="text-sm font-semibold text-primary mb-4">HIM Orkkatteri</p>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Developed and deployed a custom online data management and exam results tracking system tailored for institutional evaluation, allowing streamlined grading processes and digital record-keeping.
+                    </p>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="p-3 bg-blue-100 w-12 h-12 rounded-xl text-primary mb-6 flex items-center justify-center">
+                        <i data-lucide="book-open-check" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Arabic Curriculum & E-Learning</h3>
+                    <p class="text-sm font-semibold text-primary mb-4">Alwan Value School</p>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Designed a comprehensive Arabic language curriculum and authored specialized online learning materials focused on engaging primary students and fostering early language acquisition.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Education Section -->
+    <section id="education" class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Education & Certifications</h2>
+                <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Academic Degrees -->
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                        <i data-lucide="graduation-cap" class="w-6 h-6 mr-2 text-primary"></i> Academic Degrees
+                    </h3>
+                    <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                        
+                        <!-- Ed Item -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 bg-blue-100 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                <i data-lucide="book" class="w-4 h-4"></i>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <span class="text-xs font-semibold text-primary mb-1 block">Expected 2027</span>
+                                <h4 class="font-bold text-slate-800">B.Ed. in English (Ongoing)</h4>
+                                <p class="text-sm text-slate-500">JJ College of Education, Ammapettai</p>
+                            </div>
+                        </div>
+
+                        <!-- Ed Item -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 bg-blue-100 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                <i data-lucide="award" class="w-4 h-4"></i>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <span class="text-xs font-semibold text-primary mb-1 block">2024 - 2026</span>
+                                <h4 class="font-bold text-slate-800">M.A. in Arabic</h4>
+                                <p class="text-sm text-slate-500">IGNOU</p>
+                            </div>
+                        </div>
+
+                        <!-- Ed Item (Wafy with Dissertation) -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 bg-blue-100 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                <i data-lucide="book-open" class="w-4 h-4"></i>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <span class="text-xs font-semibold text-primary mb-1 block">2023 - 2025</span>
+                                <h4 class="font-bold text-slate-800">Masters in Islamic Theology (Wafy)</h4>
+                                <p class="text-sm text-slate-500 mb-3">Wafy Campus, Kalikavu</p>
+                                
+                                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 relative">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <i data-lucide="scroll-text" class="w-3.5 h-3.5 text-blue-600"></i>
+                                        <p class="text-xs font-bold text-blue-800 uppercase tracking-wide">PG Dissertation</p>
+                                    </div>
+                                    <p class="text-xs text-blue-900 italic leading-relaxed">
+                                        "An Analytical Study on Sheikh Ahmad Sirhindi's Contributions in Promoting Ahlu-Sunnah and Preventing Spread of Shi'ism in India."
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ed Item -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 bg-blue-100 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                <i data-lucide="award" class="w-4 h-4"></i>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <span class="text-xs font-semibold text-primary mb-1 block">2021 - 2024</span>
+                                <h4 class="font-bold text-slate-800">B.A. in English Lang & Lit.</h4>
+                                <p class="text-sm text-slate-500">University of Calicut</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certifications & Early Ed -->
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center mt-10 lg:mt-0">
+                        <i data-lucide="file-badge" class="w-6 h-6 mr-2 text-primary"></i> Diplomas & Foundation
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- Cert Card -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors flex items-start">
+                            <div class="p-2 bg-slate-50 rounded text-slate-600 mr-4 mt-1"><i data-lucide="scroll" class="w-5 h-5"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">Aliya Certificate (Undergrad)</h4>
+                                <p class="text-sm text-slate-600">Islamic & Arabic Studies, MTM College</p>
+                                <p class="text-xs text-slate-400 mt-1">2020 - 2023</p>
+                            </div>
+                        </div>
+
+                        <!-- Cert Card -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors flex items-start">
+                            <div class="p-2 bg-slate-50 rounded text-slate-600 mr-4 mt-1"><i data-lucide="languages" class="w-5 h-5"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">Diploma in Functional Arabic</h4>
+                                <p class="text-sm text-slate-600">NCPUL</p>
+                                <p class="text-xs text-slate-400 mt-1">2023 - 2025</p>
+                            </div>
+                        </div>
+
+                        <!-- Cert Card -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors flex items-start">
+                            <div class="p-2 bg-slate-50 rounded text-slate-600 mr-4 mt-1"><i data-lucide="languages" class="w-5 h-5"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">Diploma in Urdu Language</h4>
+                                <p class="text-sm text-slate-600">NCPUL</p>
+                                <p class="text-xs text-slate-400 mt-1">2023 - 2024</p>
+                            </div>
+                        </div>
+
+                         <!-- Cert Card -->
+                         <div class="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors flex items-start">
+                            <div class="p-2 bg-slate-50 rounded text-slate-600 mr-4 mt-1"><i data-lucide="building" class="w-5 h-5"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">HSE Commerce</h4>
+                                <p class="text-sm text-slate-600">RVHSS Chokli</p>
+                                <p class="text-xs text-slate-400 mt-1">2018 - 2020</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / Contact -->
+    <footer id="contact" class="bg-slate-900 text-white py-12 border-t border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <span class="text-2xl font-bold tracking-tight text-white block mb-2">JUNAID.</span>
+                    <p class="text-slate-400 text-sm">Educator | Administrator | Scholar</p>
+                    
+                    <!-- Footer Social Links (Also using SVGs) -->
+                    <div class="flex items-center justify-center md:justify-start space-x-4 mt-4">
+                        <a href="https://www.linkedin.com/in/junaid-kayakkodi-1789b5291" target="_blank" class="text-slate-400 hover:text-white transition-colors" aria-label="LinkedIn">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        <a href="https://www.instagram.com/abd_kv" target="_blank" class="text-slate-400 hover:text-white transition-colors" aria-label="Instagram">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd"/></svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col items-center md:items-end space-y-3">
+                    <a href="mailto:abdjunaidkv@gmail.com" class="flex items-center text-slate-300 hover:text-white transition-colors">
+                        <i data-lucide="mail" class="w-5 h-5 mr-2"></i> abdjunaidkv@gmail.com
+                    </a>
+                    <a href="tel:+919645555771" class="flex items-center text-slate-300 hover:text-white transition-colors">
+                        <i data-lucide="phone" class="w-5 h-5 mr-2"></i> +91 964 5555 771
+                    </a>
+                </div>
+            </div>
             
-            if (hasTarget) {
-                targetZones.add(Math.floor(x / CELL_SIZE) + ',' + Math.floor(y / CELL_SIZE));
-            }
-        }
-    }
+            <div class="mt-8 pt-8 border-t border-slate-800 text-center text-sm text-slate-500">
+                <p>&copy; <script>document.write(new Date().getFullYear())</script> Junaid. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
-    if (userPixels < 200) {
-        showDrawingError("Draw the letter first!");
-        return;
-    }
-
-    // Mathematical calculations
-    const precision = userInsideFat / userPixels;
-    
-    let hitZones = 0;
-    targetZones.forEach(z => {
-        if (userZones.has(z)) hitZones++;
-    });
-    const coverage = hitZones / targetZones.size;
-
-    // Smart Validation Rules
-    if (coverage < 0.78) { 
-        // A single pen stroke easily hits 85-95% of the zones. If it's under 78%, they definitely skipped a dot!
-        showDrawingError("You missed a part! Make sure to trace the whole shape and dots.");
-    } else if (precision < 0.40) { 
-        // Highly forgiving of loops overlapping, but rejects massive screen scribbling
-        showDrawingError("A bit messy! Try to stay on the gray marks.");
-    } else {
-        // Passed both tests!
-        const overlay = document.getElementById('draw-success-overlay');
-        if (overlay) {
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            playSound('مُمْتَاز', null); 
-        }
-    }
-}
-
-function resetDrawing() {
-    clearCanvas();
-    const overlay = document.getElementById('draw-success-overlay');
-    if (overlay) {
-        overlay.classList.add('hidden');
-        overlay.classList.remove('flex');
-    }
-}
-
-function clearCanvas() {
-    const canvas = document.getElementById('drawing-canvas');
-    if(canvas && canvasCtx) {
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-}
-
-function getCoords(e, canvas) {
-    const rect = canvas.getBoundingClientRect();
-    let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    return {
-        x: (clientX - rect.left) * scaleX / 2,
-        y: (clientY - rect.top) * scaleY / 2
-    };
-}
-
-function startDrawing(e) {
-    isDrawing = true;
-    const canvas = document.getElementById('drawing-canvas');
-    const coords = getCoords(e, canvas);
-    canvasCtx.beginPath();
-    canvasCtx.moveTo(coords.x, coords.y);
-}
-
-function draw(e) {
-    if (!isDrawing) return;
-    const canvas = document.getElementById('drawing-canvas');
-    const coords = getCoords(e, canvas);
-    canvasCtx.lineTo(coords.x, coords.y);
-    canvasCtx.stroke();
-}
-
-function stopDrawing() {
-    isDrawing = false;
-}
-
-// --- NAVIGATION ---
-function changeLesson(idx) {
-    currentLessonIdx = idx;
-    currentTab = 0;
-    scrollArea.scrollTop = 0;
-    updateAll();
-}
-
-function changeTab(idx) {
-    currentTab = idx;
-    scrollArea.scrollTop = 0;
-    updateAll();
-}
-
-function updateButtons() {
-    btnPrev.disabled = currentLessonIdx === 0;
-    btnNext.disabled = currentLessonIdx === LESSONS.length - 1;
-    
-    if(btnPrev.disabled) btnPrev.className = "flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base opacity-50 cursor-not-allowed bg-gray-100 text-gray-400";
-    else btnPrev.className = "flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-gray-100 text-gray-700 hover:bg-gray-200";
-
-    if(btnNext.disabled) btnNext.className = "flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base opacity-50 cursor-not-allowed bg-gray-100 text-gray-400";
-    else btnNext.className = "flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-indigo-600 text-white hover:bg-indigo-700 shadow-md";
-}
-
-btnPrev.addEventListener('click', () => {
-    if (currentLessonIdx > 0) changeLesson(currentLessonIdx - 1);
-});
-
-btnNext.addEventListener('click', () => {
-    if (currentLessonIdx < LESSONS.length - 1) changeLesson(currentLessonIdx + 1);
-});
-
-window.addEventListener('resize', () => {
-    if(currentTab === 2) {
-        setTimeout(initCanvas, 150);
-    }
-});
-
-function updateAll() {
-    renderSidebar();
-    renderTabs();
-    renderMainContent();
-    updateButtons();
-}
-
-// --- INIT ---
-updateAll();
-
-</script>
+    <!-- Initialize Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
