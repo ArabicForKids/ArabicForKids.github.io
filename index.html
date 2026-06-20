@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Arabic For Kids - Level 1</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Google Fonts for Arabic -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -49,27 +52,35 @@
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen w-full flex flex-col md:flex-row overflow-hidden no-select">
 
+    <!-- SIDEBAR -->
     <div class="w-full md:w-72 bg-white shadow-lg z-20 flex flex-col h-[30%] md:h-full flex-shrink-0">
         <div class="p-4 md:p-6 bg-indigo-600 text-white text-center flex-shrink-0">
             <h1 class="text-xl md:text-2xl font-bold">Arabic For Kids</h1>
             <p class="opacity-80 text-xs md:text-sm mt-1">Level 1 • All 28 Letters</p>
         </div>
         <div id="sidebar-list" class="flex-1 overflow-y-auto p-3 flex flex-row md:flex-col gap-2 md:gap-3 items-center md:items-stretch snap-x md:snap-none">
-            </div>
+            <!-- Sidebar buttons injected via JS -->
+        </div>
     </div>
 
+    <!-- MAIN CONTENT AREA -->
     <div class="flex-1 flex flex-col h-[70%] md:h-full overflow-hidden relative">
         
+        <!-- Top Bar - Tabs -->
         <div class="bg-white shadow-sm p-3 sticky top-0 z-10 flex-shrink-0">
             <div class="max-w-3xl mx-auto flex justify-center gap-2 md:gap-6" id="tabs-container">
-                </div>
+                <!-- Tabs injected via JS -->
+            </div>
         </div>
 
+        <!-- Content Body -->
         <div class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 w-full" id="main-scroll-area">
             <div class="max-w-5xl mx-auto" id="content-body">
-                </div>
+                <!-- Main content injected via JS -->
+            </div>
         </div>
 
+        <!-- Bottom Navigation -->
         <div class="bg-white border-t p-3 md:p-4 flex justify-between items-center z-10 flex-shrink-0">
             <button id="btn-prev" class="flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-gray-100 text-gray-700 hover:bg-gray-200">
                 <i data-lucide="chevron-left" class="w-5 h-5"></i>
@@ -359,6 +370,7 @@ function renderMainContent() {
         html = `
             <div class="animate-fade-in flex flex-col items-center w-full gap-8 md:gap-12 pb-8">
                 
+                <!-- DRAG AND DROP GAME -->
                 <div class="w-full bg-indigo-50 p-6 md:p-8 rounded-3xl shadow-lg border-2 border-indigo-200 text-center relative overflow-hidden">
                     <div class="inline-flex items-center gap-2 bg-white text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6 shadow-sm border border-indigo-100">
                         <span class="animate-bounce">🧩</span> Match the Vowels!
@@ -379,9 +391,11 @@ function renderMainContent() {
                         </div>
 
                         <div class="flex justify-center gap-6 w-full p-4 bg-white/50 rounded-2xl border border-indigo-100" id="draggables-container" dir="rtl">
-                            </div>
+                            <!-- Draggables injected via JS -->
+                        </div>
                     </div>
                     
+                    <!-- Success overlay -->
                     <div id="drag-success-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 hidden flex-col items-center justify-center">
                         <i data-lucide="star" class="w-20 h-20 text-yellow-400 fill-yellow-400 animate-pop mb-4"></i>
                         <h2 class="text-3xl font-bold text-indigo-600 arabic-text">Mumtaz!</h2>
@@ -391,6 +405,7 @@ function renderMainContent() {
                     </div>
                 </div>
 
+                <!-- DRAWING CANVAS -->
                 <div class="w-full bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 text-center relative overflow-hidden transition-colors duration-300" id="canvas-container">
                     <div id="drawing-prompt" class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6 shadow-sm border border-indigo-100 transition-colors duration-300">
                         <span class="animate-bounce" id="prompt-icon">✏️</span> <span id="prompt-text">Teacher Prompt: "Trace the letter carefully!"</span>
@@ -413,6 +428,7 @@ function renderMainContent() {
                         </div>
                     </div>
 
+                    <!-- Drawing Success Overlay -->
                     <div id="draw-success-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-md z-10 hidden flex-col items-center justify-center rounded-3xl">
                         <i data-lucide="star" class="w-24 h-24 text-yellow-400 fill-yellow-400 animate-pop mb-4"></i>
                         <h2 class="text-4xl font-bold text-green-500 arabic-text">Mumtaz!</h2>
@@ -423,13 +439,16 @@ function renderMainContent() {
                     </div>
                 </div>
 
+                <!-- HIDE AND SEEK -->
                 <div class="${lesson.color} w-full p-6 md:p-8 rounded-3xl shadow-lg text-center">
                     <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Hide and Seek! 🔍</h2>
                     <p class="text-sm md:text-base text-gray-600 font-medium mb-6">Can you find the words that have the letter <strong class="text-xl md:text-2xl arabic-text">${lesson.letter}</strong> in them?</p>
                     <div id="hide-and-seek-container" class="flex flex-wrap justify-center gap-4 p-4">
-                        </div>
+                        <!-- Game injected here -->
+                    </div>
                 </div>
 
+                <!-- NASHEED -->
                 <div class="w-full bg-yellow-50 p-6 md:p-8 rounded-3xl border-2 border-yellow-200 text-center shadow-sm">
                     <h2 class="text-xl md:text-2xl font-bold text-yellow-700 mb-3 flex items-center justify-center gap-2">
                         🎵 Sing Along!
@@ -783,39 +802,50 @@ function checkDrawingStrict() {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     
-    // Forgiving hitbox (50px) for sloppy lines, but coverage still ensures dots are hit
+    // PASS 1: FAT HITBOX FOR PRECISION
     hiddenCtx.lineJoin = 'round';
     hiddenCtx.lineWidth = 50; 
     hiddenCtx.strokeStyle = 'black';
     hiddenCtx.strokeText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
     hiddenCtx.fillStyle = 'black';
     hiddenCtx.fillText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
+    const fatData = hiddenCtx.getImageData(0, 0, width, height).data;
 
-    const targetData = hiddenCtx.getImageData(0, 0, width, height).data;
+    // PASS 2: THIN SKELETON FOR COVERAGE
+    hiddenCtx.clearRect(0, 0, width, height);
+    hiddenCtx.lineWidth = 2; 
+    hiddenCtx.strokeText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
+    hiddenCtx.fillText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
+    const thinData = hiddenCtx.getImageData(0, 0, width, height).data;
 
-    let userPixelCount = 0;
-    let targetPixelCount = 0;
-    let overlapCount = 0;
+    let userPixels = 0;
+    let userInsideFat = 0;
+    let thinPixels = 0;
+    let thinCoveredByUser = 0;
 
     for (let i = 3; i < userData.length; i += 4) {
         const hasUser = userData[i] > 10;
-        const hasTarget = targetData[i] > 10;
+        const hasFat = fatData[i] > 10;
+        const hasThin = thinData[i] > 10;
         
-        if (hasUser) userPixelCount++;
-        if (hasTarget) targetPixelCount++;
-        if (hasUser && hasTarget) overlapCount++;
+        if (hasUser) {
+            userPixels++;
+            if (hasFat) userInsideFat++;
+        }
+        
+        if (hasThin) {
+            thinPixels++;
+            if (hasUser) thinCoveredByUser++;
+        }
     }
 
-    if (userPixelCount < 500) {
+    if (userPixels < 200) {
         showDrawingError("Draw the letter first!");
         return;
     }
 
-    // Relaxed Precision: only 50% of the ink needs to be inside the wide boundary
-    const precision = overlapCount / userPixelCount; 
-    
-    // Strict Coverage: still need to cover 65% of the perfect letter area (to catch missed dots)
-    const coverage = overlapCount / targetPixelCount; 
+    const precision = userInsideFat / userPixels; 
+    const coverage = thinCoveredByUser / thinPixels; 
     
     if (coverage < 0.65) {
         showDrawingError("You missed a part! Did you get all the dots and shapes?");
