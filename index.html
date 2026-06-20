@@ -170,7 +170,7 @@ const LESSONS = RAW_DATA.map((d, index) => {
 
 // --- STATE ---
 let currentLessonIdx = 0;
-let currentTab = 0; // 0: Meet, 1: Sounds, 2: Play
+let currentTab = 0; 
 let isDrawing = false;
 let canvasCtx = null;
 let currentAudio = null;
@@ -209,7 +209,6 @@ function playSound(text, btnElement) {
         }
     };
 
-    const searchWord = stripHarakat(text);
     try {
         const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=ar&client=tw-ob`;
         currentAudio = new Audio(audioUrl);
@@ -380,7 +379,6 @@ function renderMainContent() {
                     <p class="text-sm text-gray-500 mb-6">Drag and Drop</p>
                     
                     <div id="drag-drop-container" class="flex flex-col items-center gap-8 w-full">
-                        <!-- Dropzones -->
                         <div class="flex justify-center gap-4 w-full" dir="rtl">
                             ${lesson.harakat.map((h, idx) => `
                                 <div class="flex flex-col items-center gap-2">
@@ -392,7 +390,6 @@ function renderMainContent() {
                             `).join('')}
                         </div>
 
-                        <!-- Draggables -->
                         <div class="flex justify-center gap-6 w-full p-4 bg-white/50 rounded-2xl border border-indigo-100" id="draggables-container" dir="rtl">
                             <!-- Draggables injected via JS -->
                         </div>
@@ -409,17 +406,15 @@ function renderMainContent() {
                 </div>
 
                 <!-- DRAWING CANVAS -->
-                <div class="w-full bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 text-center relative overflow-hidden">
-                    <div class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6">
-                        <span class="animate-bounce">✏️</span> Teacher Prompt: "Trace the letter carefully!"
+                <div class="w-full bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 text-center relative overflow-hidden transition-colors duration-300" id="canvas-container">
+                    <div id="drawing-prompt" class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6 shadow-sm border border-indigo-100 transition-colors duration-300">
+                        <span class="animate-bounce" id="prompt-icon">✏️</span> <span id="prompt-text">Teacher Prompt: "Trace the letter carefully!"</span>
                     </div>
                     <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Draw the Letter</h2>
                     
                     <div class="flex flex-col items-center gap-4 w-full max-w-md mx-auto">
                         <div class="relative w-full aspect-square bg-white rounded-3xl shadow-inner border-4 border-dashed border-gray-300 overflow-hidden touch-none">
-                            <div class="absolute inset-0 flex items-center justify-center text-[200px] sm:text-[250px] font-bold text-gray-100 select-none pointer-events-none arabic-text" dir="rtl">
-                                ${lesson.letter}
-                            </div>
+                            <canvas id="target-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
                             <canvas id="drawing-canvas" class="absolute inset-0 w-full h-full cursor-crosshair"></canvas>
                         </div>
                         
@@ -490,14 +485,12 @@ function initDragAndDrop() {
     overlay.classList.remove('flex');
     completedDrops = 0;
 
-    // Reset Dropzones
     dropzones.forEach(dz => {
         dz.innerHTML = `<span class="text-5xl md:text-6xl font-bold arabic-text text-gray-300 absolute inset-0 flex items-center justify-center pointer-events-none">${lesson.letter}</span>`;
         dz.classList.remove('bg-green-50', 'border-green-400', 'draggable-placed');
         dz.classList.add('border-gray-300', 'border-dashed');
     });
 
-    // Create Shuffled Draggables
     let draggablesData = lesson.harakat.map((h, idx) => ({ idx: idx, shape: h.shape }));
     draggablesData = draggablesData.sort(() => Math.random() - 0.5);
 
@@ -518,11 +511,8 @@ function setupDragEvents() {
     const dropzones = document.querySelectorAll('.dropzone');
     
     let draggedItem = null;
-    let startX = 0;
-    let startY = 0;
     let initialTransform = '';
 
-    // --- MOUSE EVENTS (HTML5 Drag and Drop) ---
     draggables.forEach(draggable => {
         draggable.addEventListener('dragstart', (e) => {
             draggedItem = draggable;
@@ -556,27 +546,23 @@ function setupDragEvents() {
         });
     });
 
-    // --- TOUCH EVENTS (Mobile Custom Handling) ---
     draggables.forEach(draggable => {
         draggable.addEventListener('touchstart', (e) => {
             draggedItem = draggable;
             const touch = e.touches[0];
-            startX = touch.clientX;
-            startY = touch.clientY;
             initialTransform = draggable.style.transform;
             draggable.style.position = 'absolute';
             draggable.style.zIndex = '100';
-            document.body.appendChild(draggable); // Move to body to drag freely
+            document.body.appendChild(draggable);
             moveElement(draggable, touch.clientX, touch.clientY);
         }, {passive: false});
 
         draggable.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Prevent scrolling
+            e.preventDefault(); 
             if (!draggedItem) return;
             const touch = e.touches[0];
             moveElement(draggedItem, touch.clientX, touch.clientY);
             
-            // Highlight dropzone if over
             dropzones.forEach(zone => {
                 const rect = zone.getBoundingClientRect();
                 if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
@@ -607,7 +593,6 @@ function setupDragEvents() {
             });
 
             if (!droppedOnValidZone) {
-                // Return to original container if dropped outside
                 draggedItem.style.position = 'relative';
                 draggedItem.style.left = 'auto';
                 draggedItem.style.top = 'auto';
@@ -630,12 +615,9 @@ function handleDrop(zone, draggedIdx, element, isTouch = false) {
     const draggedIdxNumber = parseInt(draggedIdx, 10);
     
     if (draggedIdxNumber === targetIdxNumber) {
-        // Correct! Play "Saheeh" sound
         playSound('صَحِيح', null);
-        
         const lesson = LESSONS[currentLessonIdx];
         
-        // Morph the placeholder into the fully vowelled letter perfectly!
         zone.innerHTML = `
             <span class="text-5xl md:text-6xl font-bold arabic-text text-indigo-600 absolute inset-0 flex items-center justify-center pointer-events-none animate-pop">${lesson.harakat[targetIdxNumber].sound}</span>
             <span class="absolute -top-4 -right-4 text-yellow-400 animate-bounce-star z-50"><i data-lucide="star" class="w-10 h-10 fill-current"></i></span>
@@ -644,11 +626,9 @@ function handleDrop(zone, draggedIdx, element, isTouch = false) {
         zone.classList.add('bg-green-50', 'border-green-400', 'draggable-placed');
         zone.classList.remove('border-gray-300', 'border-dashed');
         
-        // Remove the dragged piece completely from DOM since it is now solved
         element.remove(); 
         lucide.createIcons();
         
-        // Play the sound of the correctly matched letter shortly after
         setTimeout(() => { playSound(lesson.harakat[targetIdxNumber].sound, null); }, 800);
 
         completedDrops++;
@@ -657,11 +637,10 @@ function handleDrop(zone, draggedIdx, element, isTouch = false) {
                 const overlay = document.getElementById('drag-success-overlay');
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
-                playSound('مُمْتَاز', null); // "Mumtaz"
+                playSound('مُمْتَاز', null); 
             }, 1000);
         }
     } else {
-        // Wrong!
         triggerVibration();
         zone.classList.add('border-red-400', 'bg-red-50');
         setTimeout(() => {
@@ -669,7 +648,6 @@ function handleDrop(zone, draggedIdx, element, isTouch = false) {
         }, 500);
 
         if (isTouch) {
-            // Return to original container
             element.style.position = 'relative';
             element.style.left = 'auto';
             element.style.top = 'auto';
@@ -726,19 +704,38 @@ function handleHideSeekClick(index, isCorrect, accentClass) {
 // --- LOGIC: CANVAS ---
 function initCanvas() {
     const canvas = document.getElementById('drawing-canvas');
-    if (!canvas) return;
+    const targetCanvas = document.getElementById('target-canvas');
+    if (!canvas || !targetCanvas) return;
     
     canvasCtx = canvas.getContext('2d');
+    const targetCtx = targetCanvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
     
     canvas.width = rect.width * 2;
     canvas.height = rect.height * 2;
+    targetCanvas.width = rect.width * 2;
+    targetCanvas.height = rect.height * 2;
     
     canvasCtx.scale(2, 2);
     canvasCtx.lineCap = 'round';
     canvasCtx.lineJoin = 'round';
     canvasCtx.lineWidth = 16;
     canvasCtx.strokeStyle = '#4F46E5'; 
+
+    // Render the perfect background letter
+    targetCtx.scale(2, 2);
+    targetCtx.clearRect(0, 0, rect.width, rect.height);
+    targetCtx.textAlign = 'center';
+    targetCtx.textBaseline = 'middle';
+    
+    const isSmallScreen = window.innerWidth < 640;
+    const fontSize = isSmallScreen ? 180 : 250;
+    targetCtx.font = `bold ${fontSize}px "Noto Kufi Arabic", sans-serif`;
+    targetCtx.fillStyle = '#F3F4F6'; 
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    targetCtx.fillText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
 
     canvas.onmousedown = startDrawing;
     canvas.onmousemove = draw;
@@ -750,41 +747,103 @@ function initCanvas() {
     canvas.ontouchend = stopDrawing;
 }
 
-function clearCanvas() {
-    const canvas = document.getElementById('drawing-canvas');
-    if(canvas && canvasCtx) {
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+function showDrawingError(msg) {
+    triggerVibration();
+    const canvasContainer = document.getElementById('canvas-container');
+    const prompt = document.getElementById('drawing-prompt');
+    const promptIcon = document.getElementById('prompt-icon');
+    const promptText = document.getElementById('prompt-text');
+    
+    canvasContainer.classList.add('border-red-400');
+    
+    if(prompt && promptIcon && promptText) {
+        prompt.classList.replace('bg-indigo-100', 'bg-red-100');
+        prompt.classList.replace('text-indigo-700', 'text-red-700');
+        prompt.classList.replace('border-indigo-100', 'border-red-200');
+        promptIcon.innerText = '❌';
+        promptIcon.classList.remove('animate-bounce');
+        promptText.innerText = msg;
+        
+        setTimeout(() => {
+            prompt.classList.replace('bg-red-100', 'bg-indigo-100');
+            prompt.classList.replace('text-red-700', 'text-indigo-700');
+            prompt.classList.replace('border-red-200', 'border-indigo-100');
+            promptIcon.innerText = '✏️';
+            promptIcon.classList.add('animate-bounce');
+            promptText.innerText = 'Teacher Prompt: "Trace the letter carefully!"';
+        }, 3000);
     }
-}
-
-function isCanvasBlank(canvas) {
-    const context = canvas.getContext('2d');
-    // Create a 32-bit array representing the pixels of the canvas
-    const pixelBuffer = new Uint32Array(
-        context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
-    );
-    // If every pixel is transparent (0), the canvas is completely blank
-    return !pixelBuffer.some(color => color !== 0);
+    
+    setTimeout(() => canvasContainer.classList.remove('border-red-400'), 500);
 }
 
 function checkDrawing() {
     const canvas = document.getElementById('drawing-canvas');
-    if (!canvas) return;
+    const targetCanvas = document.getElementById('target-canvas');
+    if (!canvas || !targetCanvas) return;
 
-    if (isCanvasBlank(canvas)) {
-        triggerVibration();
-        // Visual shake feedback on the canvas container
-        canvas.parentElement.classList.add('border-red-400');
-        setTimeout(() => canvas.parentElement.classList.remove('border-red-400'), 500);
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const rect = canvas.getBoundingClientRect();
+
+    const userData = ctx.getImageData(0, 0, width, height).data;
+    
+    // Create an invisible thick hitbox to calculate drawing accuracy
+    const hiddenCanvas = document.createElement('canvas');
+    hiddenCanvas.width = width;
+    hiddenCanvas.height = height;
+    const hiddenCtx = hiddenCanvas.getContext('2d');
+    
+    hiddenCtx.scale(2, 2);
+    hiddenCtx.textAlign = 'center';
+    hiddenCtx.textBaseline = 'middle';
+    const isSmallScreen = window.innerWidth < 640;
+    const fontSize = isSmallScreen ? 180 : 250;
+    hiddenCtx.font = `bold ${fontSize}px "Noto Kufi Arabic", sans-serif`;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Create a very thick and forgiving outline for 5-year-olds
+    hiddenCtx.lineJoin = 'round';
+    hiddenCtx.lineWidth = 60; 
+    hiddenCtx.strokeStyle = 'black';
+    hiddenCtx.strokeText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
+    hiddenCtx.fillStyle = 'black';
+    hiddenCtx.fillText(LESSONS[currentLessonIdx].letter, centerX, centerY + (fontSize * 0.1));
+
+    const targetData = hiddenCtx.getImageData(0, 0, width, height).data;
+
+    let userPixelCount = 0;
+    let overlapCount = 0;
+
+    for (let i = 3; i < userData.length; i += 4) {
+        if (userData[i] > 10) {
+            userPixelCount++;
+            if (targetData[i] > 10) {
+                overlapCount++;
+            }
+        }
+    }
+
+    if (userPixelCount < 1000) {
+        showDrawingError("Draw a bit more of the letter!");
         return;
     }
 
-    // Success! Show congratulatory message
-    const overlay = document.getElementById('draw-success-overlay');
-    if (overlay) {
-        overlay.classList.remove('hidden');
-        overlay.classList.add('flex');
-        playSound('مُمْتَاز', null); // "Mumtaz"
+    const accuracy = overlapCount / userPixelCount;
+    
+    // Require 65% of the drawing to be inside the gray marks
+    if (accuracy > 0.65) {
+        const overlay = document.getElementById('draw-success-overlay');
+        if (overlay) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            playSound('مُمْتَاز', null); 
+        }
+    } else {
+        showDrawingError("Oops! Try to stay on the gray marks.");
     }
 }
 
@@ -794,6 +853,13 @@ function resetDrawing() {
     if (overlay) {
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
+    }
+}
+
+function clearCanvas() {
+    const canvas = document.getElementById('drawing-canvas');
+    if(canvas && canvasCtx) {
+        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     }
 }
 
