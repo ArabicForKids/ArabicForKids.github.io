@@ -155,7 +155,6 @@ const LESSONS = RAW_DATA.map((d, index) => {
       { word: d.ev[1][0], english: d.ev[1][1], icon: d.ev[1][2] }
     ],
     harakat: d.h.map((hItem, hIdx) => {
-      // Map Harakat visual shapes based on index (0=Fatha, 1=Kasra, 2=Damma)
       let shape = '';
       if(hIdx === 0) shape = 'َ';
       else if(hIdx === 1) shape = 'ِ';
@@ -228,7 +227,7 @@ window.speechSynthesis.onvoiceschanged = () => {
 
 function triggerVibration() {
     if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100]); // Double vibrate for error feedback
+        navigator.vibrate([100, 50, 100]);
     }
 }
 
@@ -372,7 +371,7 @@ function renderMainContent() {
         html = `
             <div class="animate-fade-in flex flex-col items-center w-full gap-8 md:gap-12 pb-8">
                 
-                <!-- NEW DRAG AND DROP GAME -->
+                <!-- DRAG AND DROP GAME -->
                 <div class="w-full bg-indigo-50 p-6 md:p-8 rounded-3xl shadow-lg border-2 border-indigo-200 text-center relative overflow-hidden">
                     <div class="inline-flex items-center gap-2 bg-white text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6 shadow-sm border border-indigo-100">
                         <span class="animate-bounce">🧩</span> Match the Vowels!
@@ -402,7 +401,7 @@ function renderMainContent() {
                     <!-- Success overlay -->
                     <div id="drag-success-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 hidden flex-col items-center justify-center">
                         <i data-lucide="star" class="w-20 h-20 text-yellow-400 fill-yellow-400 animate-pop mb-4"></i>
-                        <h2 class="text-3xl font-bold text-indigo-600 arabic-text">Mumtaz! (Excellent!)</h2>
+                        <h2 class="text-3xl font-bold text-indigo-600 arabic-text">Mumtaz!</h2>
                         <button onclick="initDragAndDrop()" class="mt-6 px-6 py-2 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-700 transition-colors">
                             Play Again
                         </button>
@@ -410,7 +409,7 @@ function renderMainContent() {
                 </div>
 
                 <!-- DRAWING CANVAS -->
-                <div class="w-full bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 text-center">
+                <div class="w-full bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 text-center relative overflow-hidden">
                     <div class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold text-xs md:text-sm mb-4 md:mb-6">
                         <span class="animate-bounce">✏️</span> Teacher Prompt: "Trace the letter carefully!"
                     </div>
@@ -423,8 +422,24 @@ function renderMainContent() {
                             </div>
                             <canvas id="drawing-canvas" class="absolute inset-0 w-full h-full cursor-crosshair"></canvas>
                         </div>
-                        <button onclick="clearCanvas()" class="flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full transition-colors">
-                            <i data-lucide="eraser" class="w-5 h-5"></i> Clear & Try Again
+                        
+                        <div class="flex items-center gap-4 justify-center mt-4">
+                            <button onclick="clearCanvas()" class="flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full transition-colors">
+                                <i data-lucide="eraser" class="w-5 h-5"></i> Clear
+                            </button>
+                            <button onclick="checkDrawing()" class="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition-colors shadow-md">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i> I'm Done! ✨
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Drawing Success Overlay -->
+                    <div id="draw-success-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-md z-10 hidden flex-col items-center justify-center rounded-3xl">
+                        <i data-lucide="star" class="w-24 h-24 text-yellow-400 fill-yellow-400 animate-pop mb-4"></i>
+                        <h2 class="text-4xl font-bold text-green-500 arabic-text">Mumtaz!</h2>
+                        <p class="text-gray-600 mt-2 font-bold text-xl">Beautiful Drawing!</p>
+                        <button onclick="resetDrawing()" class="mt-8 px-8 py-3 bg-green-500 text-white font-bold rounded-full hover:bg-green-600 transition-colors shadow-md">
+                            Draw Again
                         </button>
                     </div>
                 </div>
@@ -739,6 +754,46 @@ function clearCanvas() {
     const canvas = document.getElementById('drawing-canvas');
     if(canvas && canvasCtx) {
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+function isCanvasBlank(canvas) {
+    const context = canvas.getContext('2d');
+    // Create a 32-bit array representing the pixels of the canvas
+    const pixelBuffer = new Uint32Array(
+        context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+    );
+    // If every pixel is transparent (0), the canvas is completely blank
+    return !pixelBuffer.some(color => color !== 0);
+}
+
+function checkDrawing() {
+    const canvas = document.getElementById('drawing-canvas');
+    if (!canvas) return;
+
+    if (isCanvasBlank(canvas)) {
+        triggerVibration();
+        // Visual shake feedback on the canvas container
+        canvas.parentElement.classList.add('border-red-400');
+        setTimeout(() => canvas.parentElement.classList.remove('border-red-400'), 500);
+        return;
+    }
+
+    // Success! Show congratulatory message
+    const overlay = document.getElementById('draw-success-overlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        playSound('مُمْتَاز', null); // "Mumtaz"
+    }
+}
+
+function resetDrawing() {
+    clearCanvas();
+    const overlay = document.getElementById('draw-success-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
     }
 }
 
