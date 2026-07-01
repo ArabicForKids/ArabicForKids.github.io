@@ -3,98 +3,779 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arabic For Kids - Level 2 Coming Soon</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Arabic For Kids - Level 2 (Reading)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <style>
-        body { font-family: 'Nunito', sans-serif; }
+        body { font-family: 'Nunito', sans-serif; background-color: #f8fafc; }
         .arabic-text { font-family: 'Noto Kufi Arabic', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .no-select { user-select: none; -webkit-user-select: none; }
         
-        /* Fun Animations */
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
-        .animate-float { animation: float 4s ease-in-out infinite; }
-        .animate-float-delayed { animation: float 5s ease-in-out 2s infinite; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        .animate-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.9) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .fade-in-up { animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
-        @keyframes rocketBounce {
-            0%, 100% { transform: translateY(0) rotate(45deg); }
-            50% { transform: translateY(-15px) rotate(45deg); }
-        }
-        .animate-rocket { animation: rocketBounce 2s infinite; display: inline-block;}
-        
-        /* Custom Background Pattern */
-        .bg-pattern {
-            background-color: #f8fafc;
-            background-image: radial-gradient(#e2e8f0 2px, transparent 2px);
-            background-size: 30px 30px;
-        }
+        /* Drag & Drop */
+        .draggable { cursor: grab; touch-action: none; z-index: 20; }
+        .draggable:active { cursor: grabbing; }
+        .dropzone.dragover { transform: scale(1.05); border-color: #10B981; background-color: #F0FDF4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); }
+        .is-dragging { opacity: 0.5; z-index: 50; pointer-events: none; }
     </style>
 </head>
-<body class="bg-pattern min-h-screen relative overflow-hidden flex items-center justify-center">
+<body class="text-slate-800 h-screen w-full flex flex-col md:flex-row overflow-hidden no-select bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
 
-    <!-- Decorative Floating Elements (Background) -->
-    <div class="absolute top-10 left-10 text-6xl opacity-20 animate-float pointer-events-none">⭐</div>
-    <div class="absolute top-32 right-20 text-7xl opacity-20 animate-float-delayed pointer-events-none text-green-400 arabic-text">ج</div>
-    <div class="absolute bottom-20 left-20 text-6xl opacity-20 animate-float-delayed pointer-events-none">🧩</div>
-    <div class="absolute bottom-32 right-10 text-7xl opacity-20 animate-float pointer-events-none arabic-text text-indigo-400">م</div>
-    <div class="absolute top-1/2 left-1/4 text-5xl opacity-20 animate-float pointer-events-none">✨</div>
-
-    <div class="relative z-10 max-w-2xl w-full px-6">
-        
-        <div class="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl border-b-[16px] border-green-500 fade-in-up text-center">
-            
-            <!-- Icon / Emoji -->
-            <div class="mb-8">
-                <div class="bg-green-50 w-40 h-40 mx-auto rounded-full flex items-center justify-center shadow-inner border-4 border-green-100 relative">
-                    <span class="text-7xl animate-rocket">🚀</span>
-                    <!-- Little sparkles around the rocket -->
-                    <span class="absolute top-2 right-4 text-2xl animate-pulse">✨</span>
-                    <span class="absolute bottom-4 left-4 text-2xl animate-pulse" style="animation-delay: 0.5s;">⭐</span>
-                </div>
-            </div>
-
-            <!-- Typography -->
-            <div class="inline-flex items-center gap-2 bg-yellow-100 text-yellow-700 px-5 py-2 rounded-full font-bold text-sm md:text-base mb-6 shadow-sm border border-yellow-200">
-                <span class="animate-bounce">🚧</span> Under Construction
-            </div>
-            
-            <h1 class="text-4xl md:text-6xl font-black text-gray-800 mb-6 tracking-tight">
-                Level 2 is Launching Soon!
-            </h1>
-            
-            <p class="text-xl md:text-2xl text-gray-500 font-bold mb-12 leading-relaxed">
-                We are busy building fun new lessons where letters learn to hold hands and make words! Check back soon.
-            </p>
-
-            <!-- Navigation Button -->
-            <a href="index.html" class="inline-flex items-center justify-center gap-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xl px-10 py-5 rounded-full transition-transform hover:-translate-y-1 shadow-md border-2 border-slate-200 w-full sm:w-auto">
-                <i data-lucide="arrow-left" class="w-6 h-6"></i> 
-                Back to Main Menu
+    <!-- SIDEBAR -->
+    <div class="w-full md:w-80 bg-white shadow-xl z-20 flex flex-col h-[30%] md:h-full flex-shrink-0">
+        <div class="p-4 md:p-6 bg-emerald-500 text-white text-center relative flex-shrink-0">
+            <a href="index.html" class="absolute top-4 left-4 bg-white/20 p-2 rounded-lg hover:bg-white/40 transition-colors">
+                <i data-lucide="home" class="w-5 h-5"></i>
             </a>
-
+            <h1 class="text-xl md:text-2xl font-bold mt-1">Arabic For Kids</h1>
+            <p class="opacity-80 text-xs md:text-sm mt-1">Level 2 • Reading Journey</p>
+        </div>
+        
+        <div id="sidebar-list" class="flex-1 overflow-y-auto p-3 flex flex-row md:flex-col gap-2 md:gap-3 items-center md:items-stretch snap-x md:snap-none">
+            <!-- Sidebar injected here -->
         </div>
     </div>
 
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
-    </script>
+    <!-- MAIN AREA -->
+    <div class="flex-1 flex flex-col h-[70%] md:h-full overflow-hidden relative">
+        <div class="bg-white/90 backdrop-blur-md shadow-sm p-2 md:p-3 sticky top-0 z-10 border-b border-gray-200">
+            <div class="max-w-3xl mx-auto flex justify-center gap-2 md:gap-6" id="tabs-container"></div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 w-full" id="main-scroll-area">
+            <div class="max-w-5xl mx-auto" id="content-body"></div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bg-white border-t p-3 md:p-4 flex justify-between items-center z-10 flex-shrink-0">
+            <button id="btn-prev" onclick="prevLesson()" class="flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-gray-100 text-gray-700 hover:bg-gray-200">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                <span class="hidden sm:inline">Previous Lesson</span><span class="sm:hidden">Prev</span>
+            </button>
+            <button id="btn-next" onclick="nextLesson()" class="flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-emerald-500 text-white hover:bg-emerald-600 shadow-md">
+                <span class="hidden sm:inline">Next Lesson</span><span class="sm:hidden">Next</span>
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </div>
+
+<script>
+// --- FULL LEVEL 2 CURRICULUM ---
+const ALPHABET = ['أ','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
+
+const LESSONS = [
+    {
+        id: 1, type: 'review', title: 'Remember Harakat', desc: 'Short vowels check!', color: 'bg-blue-100', accent: 'bg-blue-500', text: 'text-blue-600', border: 'border-blue-500',
+        items: [ { char: 'سَ', sound: 'sa' }, { char: 'مِ', sound: 'mi' }, { char: 'رُ', sound: 'ru' }, { char: 'قَ', sound: 'qa' }, { char: 'لِ', sound: 'li' }, { char: 'بُ', sound: 'bu' } ]
+    },
+    {
+        id: 2, type: 'review', title: 'Remember Tanween', desc: 'Double vowels check!', color: 'bg-purple-100', accent: 'bg-purple-500', text: 'text-purple-600', border: 'border-purple-500',
+        items: [ { char: 'بً', sound: 'ban' }, { char: 'تٍ', sound: 'tin' }, { char: 'جٌ', sound: 'jun' }, { char: 'دً', sound: 'dan' }, { char: 'طٍ', sound: 'tin' }, { char: 'عٌ', sound: 'un' } ]
+    },
+    {
+        id: 3, type: 'shaddah', title: 'The Shaddah', desc: 'Double Consonants!', color: 'bg-rose-100', accent: 'bg-rose-500', text: 'text-rose-600', border: 'border-rose-500',
+        items: [ 
+            { parts: ['مْ', 'مَ'], joined: 'مَّ', sound: 'mma' }, 
+            { parts: ['بْ', 'بُ'], joined: 'بُّ', sound: 'bbu' }, 
+            { parts: ['دْ', 'دِ'], joined: 'دِّ', sound: 'ddi' }, 
+            { parts: ['طْ', 'طَ'], joined: 'طَّ', sound: 'tta' } 
+        ]
+    },
+    {
+        id: 4, type: 'shapes', title: 'Letter Shapes', desc: 'Beginning, Middle, End!', color: 'bg-pink-100', accent: 'bg-pink-500', text: 'text-pink-600', border: 'border-pink-500',
+        items: [
+            { base: 'ب', beg: 'بـ', mid: 'ـبـ', end: 'ـب', word: 'بَيْت', parts: ['', 'يْت'], ans: 'بـ' },
+            { base: 'ع', beg: 'عـ', mid: 'ـعـ', end: 'ـع', word: 'مَعَ', parts: ['مَـ', ''], ans: 'ـع' },
+            { base: 'ج', beg: 'جـ', mid: 'ـجـ', end: 'ـج', word: 'مَسْجِد', parts: ['مَسْـ', 'ـِد'], ans: 'ـجـ' },
+            { base: 'د', beg: 'د', mid: 'ـد', end: 'ـد', word: 'دِيْك', parts: ['', 'ِيْك'], ans: 'د' },
+            { base: 'ه', beg: 'هـ', mid: 'ـهـ', end: 'ـه', word: 'شَهْر', parts: ['شَـ', 'ـْر'], ans: 'ـهـ' },
+            { base: 'ي', beg: 'يـ', mid: 'ـيـ', end: 'ـي', word: 'كُرْسِي', parts: ['كُرْسِـ', ''], ans: 'ـي' },
+            { base: 'و', beg: 'و', mid: 'ـو', end: 'ـو', word: 'وَرْدَة', parts: ['', 'َرْدَة'], ans: 'و' }
+        ]
+    },
+    {
+        id: 5, type: 'words', title: '2-Letter Words', desc: 'Simple words!', color: 'bg-emerald-100', accent: 'bg-emerald-500', text: 'text-emerald-600', border: 'border-emerald-500',
+        words: [
+            { split: ['أَ','ب'], joined: 'أَب', eng: 'Father', icon: '🧔‍♂️' },
+            { split: ['أُ','م'], joined: 'أُم', eng: 'Mother', icon: '🧕' },
+            { split: ['أَ','خ'], joined: 'أَخ', eng: 'Brother', icon: '👦' },
+            { split: ['يَ','د'], joined: 'يَد', eng: 'Hand', icon: '✋' },
+            { split: ['فَ','م'], joined: 'فَم', eng: 'Mouth', icon: '👄' }
+        ]
+    },
+    {
+        id: 6, type: 'words', title: '3-Letter Nouns', desc: 'Things around us!', color: 'bg-orange-100', accent: 'bg-orange-500', text: 'text-orange-600', border: 'border-orange-500',
+        words: [
+            { split: ['قَ','لَ','م'], joined: 'قَلَم', eng: 'Pen', icon: '🖊️' },
+            { split: ['قَ','مَ','ر'], joined: 'قَمَر', eng: 'Moon', icon: '🌙' },
+            { split: ['أَ','سَ','د'], joined: 'أَسَد', eng: 'Lion', icon: '🦁' },
+            { split: ['بَ','قَ','ر'], joined: 'بَقَر', eng: 'Cow', icon: '🐄' },
+            { split: ['و','ل','د'], joined: 'وَلَد', eng: 'Boy', icon: '👦' } 
+        ]
+    },
+    {
+        id: 7, type: 'words', title: '3-Letter Actions', desc: 'Doing words!', color: 'bg-red-100', accent: 'bg-red-500', text: 'text-red-600', border: 'border-red-500',
+        words: [
+            { split: ['ك','ت','ب'], joined: 'كَتَبَ', eng: 'He Wrote', icon: '✍️' },
+            { split: ['ق','ر','أ'], joined: 'قَرَأَ', eng: 'He Read', icon: '📖' },
+            { split: ['أ','ك','ل'], joined: 'أَكَلَ', eng: 'He Ate', icon: '🍎' },
+            { split: ['ج','ل','س'], joined: 'جَلَسَ', eng: 'He Sat', icon: '🪑' },
+            { split: ['ش','ر','ب'], joined: 'شَرِبَ', eng: 'He Drank', icon: '💧' }
+        ]
+    },
+    {
+        id: 8, type: 'sentences', title: 'Simple Sentences', desc: 'Read full sentences!', color: 'bg-teal-100', accent: 'bg-teal-500', text: 'text-teal-600', border: 'border-teal-500',
+        sentences: [
+            { words: ['هُوَ', 'أُسْتَاذ'], full: 'هُوَ أُسْتَاذ', icon: '👨‍🏫', eng: 'He is a teacher' },
+            { words: ['هَذَا', 'مُحَمَّد'], full: 'هَذَا مُحَمَّد', icon: '👦', eng: 'This is Muhammad' },
+            { words: ['الْبُسْتَانُ', 'جَمِيل'], full: 'الْبُسْتَانُ جَمِيل', icon: '🌷🌻', eng: 'The garden is beautiful' },
+            { words: ['ذَهَبْتُ', 'إِلَى', 'الْمَسْجِد'], full: 'ذَهَبْتُ إِلَى الْمَسْجِد', icon: '🕌 🚶‍♂️', eng: 'I went to the mosque' }
+        ]
+    }
+];
+
+// --- STATE ---
+let currentLessonIdx = 0;
+let currentTab = 0; 
+let currentAudio = null;
+
+// --- AUDIO LOGIC ---
+function playSound(text, btnElement) {
+    if(btnElement) {
+        btnElement.classList.add('scale-95');
+        setTimeout(() => {
+            if(document.body.contains(btnElement)) btnElement.classList.remove('scale-95');
+        }, 150);
+    }
+    if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+    window.speechSynthesis.cancel();
+
+    const speakText = () => {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ar-SA'; utterance.rate = 0.7; utterance.pitch = 1.2; 
+            window.speechSynthesis.speak(utterance);
+        }
+    };
+    try {
+        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=ar&client=tw-ob`;
+        currentAudio = new Audio(audioUrl);
+        currentAudio.play().catch(() => speakText());
+    } catch (e) { speakText(); }
+}
+
+function triggerVib() { if (navigator.vibrate) navigator.vibrate([100, 50, 100]); }
+
+// --- RENDER ---
+function renderSidebar() {
+    const list = document.getElementById('sidebar-list');
+    if (!list) return;
+    
+    list.innerHTML = LESSONS.map((l, idx) => `
+        <button onclick="changeLesson(${idx})" class="snap-center flex-none w-56 md:w-auto flex flex-col items-start p-4 rounded-2xl border-2 transition-all ${currentLessonIdx === idx ? `active-lesson ${l.border} ${l.color} shadow-md md:scale-105` : 'border-transparent bg-white hover:bg-gray-50'}">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Unit ${l.id}</span>
+            <span class="text-lg font-black text-gray-800">${l.title}</span>
+        </button>
+    `).join('');
+}
+
+function renderTabs() {
+    const l = LESSONS[currentLessonIdx];
+    const tc = document.getElementById('tabs-container');
+    if (!tc) return;
+
+    let tab1Label = 'Build It!';
+    let tab1Icon = 'grid';
+    if (l.type === 'words') { tab1Label = 'Spell It!'; tab1Icon = 'keyboard'; }
+    if (l.type === 'sentences') { tab1Label = 'Train!'; tab1Icon = 'train'; }
+    if (l.type === 'review') { tab1Label = 'Listen!'; tab1Icon = 'headphones'; }
+    if (l.type === 'shapes') { tab1Label = 'Fix It!'; tab1Icon = 'wrench'; }
+    if (l.type === 'shaddah') { tab1Label = 'Merge It!'; tab1Icon = 'combine'; }
+
+    const t = [
+        { l: 'Learn', i: 'book-open' },
+        { l: tab1Label, i: tab1Icon },
+        { l: 'Match It!', i: 'puzzle' }
+    ];
+    
+    tc.innerHTML = t.map((tab, idx) => `
+        <button onclick="changeTab(${idx})" class="flex flex-col items-center p-2 md:px-8 md:py-3 rounded-2xl transition-all flex-1 md:flex-none ${currentTab === idx ? `${l.color} ${l.text} shadow-inner font-black` : 'text-gray-500 hover:bg-gray-100 font-bold'}">
+            <i data-lucide="${tab.i}" class="w-5 h-5 mb-1"></i><span class="text-xs md:text-sm">${idx + 1}. ${tab.l}</span>
+        </button>
+    `).join('');
+    lucide.createIcons();
+}
+
+function renderMainContent() {
+    const l = LESSONS[currentLessonIdx];
+    const container = document.getElementById('content-body');
+    if (!container) return;
+    
+    let html = '';
+
+    // --- TAB 0: LEARN ---
+    if (currentTab === 0) {
+        if(l.type === 'review') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">${l.title}</h2><div class="grid grid-cols-2 md:grid-cols-3 gap-6">` + 
+                l.items.map(i => `<button onclick="playSound('${i.sound}', this)" class="bg-white p-8 rounded-3xl shadow-md border-b-4 border-gray-200 hover:${l.border} transition-all active:scale-95"><span class="text-6xl font-black arabic-text">${i.char}</span></button>`).join('') + `</div></div>`;
+        } else if (l.type === 'shaddah') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">What is Shaddah?</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6">` + 
+                l.items.map(i => `<button onclick="playSound('${i.sound}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex flex-col items-center justify-center hover:scale-105 transition-all"><div class="text-4xl font-bold arabic-text text-gray-400 mb-2" dir="rtl">${i.parts[0]} + ${i.parts[1]} = </div><div class="text-7xl font-black arabic-text text-rose-600">${i.joined}</div></button>`).join('') + `</div></div>`;
+        } else if (l.type === 'shapes') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">How Letters Join</h2><div class="flex flex-col gap-4">` +
+                l.items.map(i => `<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center text-4xl font-bold arabic-text" dir="rtl"><span class="text-gray-400 w-16">${i.base}</span><span class="w-16">${i.beg}</span><span class="w-16">${i.mid}</span><span class="w-16">${i.end}</span></div>`).join('') + `</div></div>`;
+        } else if (l.type === 'words') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">Read the Words!</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6">` +
+                l.words.map(w => `<button onclick="playSound('${w.joined}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex flex-col items-center gap-4 hover:scale-105 transition-all"><span class="text-6xl">${w.icon}</span><span class="text-5xl font-black arabic-text text-indigo-600">${w.joined}</span><span class="text-gray-400 font-bold uppercase">${w.eng}</span></button>`).join('') + `</div></div>`;
+        } else if (l.type === 'sentences') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">Read Sentences!</h2><div class="flex flex-col gap-6">` +
+                l.sentences.map(s => `<button onclick="playSound('${s.full}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex items-center justify-between hover:scale-[1.02] transition-all" dir="rtl"><span class="text-6xl">${s.icon}</span><div class="flex flex-col items-start"><span class="text-4xl font-black arabic-text text-indigo-600">${s.full}</span><span class="text-gray-400 font-bold uppercase mt-2">${s.eng}</span></div></button>`).join('') + `</div></div>`;
+        }
+    } 
+    // --- TAB 1: BUILD / SPELL ---
+    else if (currentTab === 1) {
+        if (l.type === 'review') {
+            html = `<div class="text-center animate-fade-in"><h2 class="text-2xl font-black mb-4">Listening Game</h2><p class="mb-8">Click the speaker, then pick the correct card!</p><div class="bg-white p-10 rounded-3xl shadow-lg inline-block mb-8"><button onclick="playTargetSound()" class="bg-indigo-100 text-indigo-600 p-6 rounded-full hover:scale-110 transition-transform"><i data-lucide="volume-2" class="w-12 h-12"></i></button></div><div id="review-options" class="flex justify-center gap-6 flex-wrap"></div></div>`;
+        } else if (l.type === 'shaddah') {
+            html = `<div class="text-center animate-fade-in w-full max-w-2xl mx-auto"><h2 class="text-2xl font-black mb-8">Merge the Letters!</h2><p class="mb-6 text-gray-500">Drag the double letter to finish the math.</p><div id="shaddah-game-area" class="bg-white p-8 rounded-3xl shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+        } else if (l.type === 'shapes') {
+            html = `<div class="text-center animate-fade-in w-full max-w-2xl mx-auto"><h2 class="text-2xl font-black mb-8">Shape Shifter!</h2><p class="mb-6 text-gray-500">Drag the correct shape to fix the word.</p><div id="shape-game-area" class="bg-white p-8 rounded-3xl shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+        } else if (l.type === 'words') {
+            html = `<div class="text-center animate-fade-in"><h2 class="text-2xl font-black mb-2">The Spelling Bee</h2><p class="mb-8 text-gray-500">Drag letters in order to spell the word.</p><div id="spell-game-area" class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+        } else if (l.type === 'sentences') {
+            html = `<div class="text-center animate-fade-in"><h2 class="text-2xl font-black mb-2">Sentence Train</h2><p class="mb-8 text-gray-500">Drag the words in order to match the picture.</p><div id="sentence-game-area" class="bg-white p-8 rounded-[2.5rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+        }
+    } 
+    // --- TAB 2: MATCH ---
+    else if (currentTab === 2) {
+        html = `<div class="text-center animate-fade-in w-full"><h2 class="text-2xl font-black mb-6">Match Everything!</h2><div id="match-game-area" class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+    }
+
+    container.innerHTML = html;
+    lucide.createIcons();
+
+    // Init specific games
+    if (currentTab === 1) {
+        if(l.type === 'review') initReviewGame();
+        else if(l.type === 'shaddah') initShaddahGame();
+        else if(l.type === 'shapes') initShapeGame();
+        else if(l.type === 'words') initSpellGame();
+        else if(l.type === 'sentences') initSentenceGame();
+    } else if (currentTab === 2) {
+        initMatchGame();
+    }
+}
+
+// --- GAME LOGIC: REVIEW (Listen & Find) ---
+let currentReviewTarget = null;
+function initReviewGame() {
+    const reviewOpts = document.getElementById('review-options');
+    if (!reviewOpts) return;
+
+    const l = LESSONS[currentLessonIdx];
+    currentReviewTarget = l.items[Math.floor(Math.random() * l.items.length)];
+    const options = [...l.items].sort(() => Math.random() - 0.5).slice(0, 3);
+    if(!options.includes(currentReviewTarget)) options[0] = currentReviewTarget;
+    options.sort(() => Math.random() - 0.5);
+
+    reviewOpts.innerHTML = options.map((opt, i) => `
+        <button onclick="checkReview('${opt.char}', this)" class="bg-white border-2 border-gray-200 px-8 py-6 rounded-2xl shadow-sm text-5xl font-black arabic-text hover:border-indigo-400 hover:scale-105 transition-all">${opt.char}</button>
+    `).join('');
+    setTimeout(playTargetSound, 500);
+}
+window.playTargetSound = () => {
+    if (currentReviewTarget) playSound(currentReviewTarget.sound, null);
+}
+window.checkReview = (char, btn) => {
+    if(char === currentReviewTarget.char) {
+        playSound('صَحِيح', null);
+        btn.classList.replace('border-gray-200', 'border-green-500');
+        btn.classList.add('bg-green-50');
+        setTimeout(() => {
+            if (document.getElementById('review-options')) initReviewGame();
+        }, 1500);
+    } else {
+        triggerVib();
+        btn.classList.replace('border-gray-200', 'border-red-500');
+        setTimeout(() => {
+            if (document.body.contains(btn)) btn.classList.replace('border-red-500', 'border-gray-200');
+        }, 500);
+    }
+}
+
+// --- GAME LOGIC: SHADDAH MERGE ---
+let currentShaddahIdx = 0;
+function initShaddahGame() {
+    const shaddahArea = document.getElementById('shaddah-game-area');
+    if (!shaddahArea) return;
+
+    const l = LESSONS[currentLessonIdx];
+    const item = l.items[currentShaddahIdx];
+    
+    let html = `
+        <div class="text-4xl md:text-6xl font-black arabic-text text-gray-800 mb-12 flex justify-center items-center gap-4" dir="rtl">
+            <span class="text-gray-400">${item.parts[0]} + ${item.parts[1]}</span>
+            <span class="text-gray-400">=</span>
+            <div class="dropzone w-20 h-24 md:w-24 md:h-28 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center" data-ans="${item.joined}"></div>
+        </div>
+        <div class="flex justify-center gap-6 flex-wrap" id="draggables-container" dir="rtl">
+            ${[...l.items].sort(() => Math.random() - 0.5).map((opt, i) => `
+                <div class="draggable bg-rose-50 border-2 border-rose-200 w-16 h-16 md:w-20 md:h-20 rounded-xl flex items-center justify-center text-4xl md:text-5xl font-black arabic-text text-rose-600 hover:scale-110 z-20 touch-none" draggable="true" data-val="${opt.joined}">${opt.joined}</div>
+            `).join('')}
+        </div>
+        <div id="shaddah-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-3xl">
+            <h2 class="text-4xl font-black text-green-500 mb-6 arabic-text">مُمْتَاز!</h2>
+            <button onclick="nextShaddah()" class="px-8 py-3 bg-rose-500 text-white font-bold rounded-full shadow-lg">Next</button>
+        </div>
+    `;
+    shaddahArea.innerHTML = html;
+    setupDraggables(handleShaddahDrop);
+}
+function handleShaddahDrop(zone, val, el) {
+    if(zone.dataset.ans === val) {
+        playSound('صَحِيح', null);
+        zone.innerHTML = `<span class="text-6xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
+        zone.classList.replace('border-dashed', 'border-solid');
+        zone.classList.replace('border-gray-300', 'border-green-400');
+        el.remove();
+        setTimeout(() => {
+            const successEl = document.getElementById('shaddah-success');
+            if(successEl) successEl.classList.replace('hidden', 'flex');
+        }, 1000);
+    } else {
+        triggerVib();
+        zone.classList.add('bg-red-50', 'border-red-400');
+        setTimeout(() => {
+            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
+        }, 500);
+        return false; 
+    }
+    return true;
+}
+window.nextShaddah = () => {
+    currentShaddahIdx = (currentShaddahIdx + 1) % LESSONS[currentLessonIdx].items.length;
+    initShaddahGame();
+}
+
+// --- GAME LOGIC: SHAPE SHIFTER ---
+let currentShapeIdx = 0;
+function initShapeGame() {
+    const shapeArea = document.getElementById('shape-game-area');
+    if (!shapeArea) return;
+
+    const l = LESSONS[currentLessonIdx];
+    const item = l.items[currentShapeIdx];
+    
+    // Using RTL layout correctly: Right span is first in DOM, Left is second.
+    let html = `
+        <div class="text-6xl md:text-7xl font-black arabic-text text-gray-800 mb-12 flex justify-center items-center" dir="rtl">
+            <span class="px-1">${item.parts[0]}</span>
+            <div class="dropzone w-16 h-20 md:w-20 md:h-24 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center mx-1" data-ans="${item.ans}"></div>
+            <span class="px-1">${item.parts[1]}</span>
+        </div>
+        <div class="flex justify-center gap-6 flex-wrap" id="draggables-container" dir="rtl">
+            ${[item.beg, item.mid, item.end, item.base].sort(() => Math.random() - 0.5).map((opt, i) => `
+                <div class="draggable bg-indigo-50 border-2 border-indigo-200 w-16 h-16 rounded-xl flex items-center justify-center text-4xl font-black arabic-text text-indigo-600 hover:scale-110 z-20 touch-none" draggable="true" data-val="${opt}">${opt}</div>
+            `).join('')}
+        </div>
+        <div id="shape-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-3xl">
+            <h2 class="text-4xl font-black text-green-500 mb-6 arabic-text">مُمْتَاز!</h2>
+            <button onclick="nextShape()" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-full">Next Shape</button>
+        </div>
+    `;
+    shapeArea.innerHTML = html;
+    setupDraggables(handleShapeDrop);
+}
+function handleShapeDrop(zone, val, el) {
+    if(zone.dataset.ans === val) {
+        playSound('صَحِيح', null);
+        zone.innerHTML = `<span class="text-5xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
+        zone.classList.replace('border-dashed', 'border-solid');
+        zone.classList.replace('border-gray-300', 'border-green-400');
+        el.remove();
+        setTimeout(() => {
+            const successEl = document.getElementById('shape-success');
+            if(successEl) successEl.classList.replace('hidden', 'flex');
+        }, 1000);
+    } else {
+        triggerVib();
+        zone.classList.add('bg-red-50', 'border-red-400');
+        setTimeout(() => {
+            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
+        }, 500);
+        return false; 
+    }
+    return true;
+}
+window.nextShape = () => {
+    currentShapeIdx = (currentShapeIdx + 1) % LESSONS[currentLessonIdx].items.length;
+    initShapeGame();
+}
+
+// --- GAME LOGIC: SPELLING BEE (4x3 Pool) ---
+let currentSpellIdx = 0;
+function initSpellGame() {
+    const spellArea = document.getElementById('spell-game-area');
+    if (!spellArea) return;
+
+    const l = LESSONS[currentLessonIdx];
+    const word = l.words[currentSpellIdx];
+    
+    let wordParts = word.split || word.joined.split('');
+
+    let pool = [...wordParts];
+    while(pool.length < 12) {
+        const rand = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+        if(!pool.includes(rand)) pool.push(rand);
+    }
+    pool.sort(() => Math.random() - 0.5);
+
+    let html = `
+        <div class="text-7xl mb-6">${word.icon}</div>
+        <div class="flex justify-center gap-4 mb-10" dir="rtl" id="spell-dropzones">
+            ${wordParts.map((char, i) => `
+                <div class="dropzone w-16 h-20 md:w-20 md:h-24 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex flex-col items-center justify-center relative flex-shrink-0" data-ans="${char}" data-filled="false">
+                    <span class="text-xs text-gray-400 absolute bottom-2">${i+1}</span>
+                </div>
+            `).join('')}
+        </div>
+        <div class="grid grid-cols-4 md:grid-cols-6 gap-3" dir="rtl" id="draggables-container">
+            ${pool.map((char, i) => `
+                <div class="draggable bg-indigo-50 border-b-4 border-indigo-200 h-14 md:h-16 rounded-xl flex items-center justify-center text-3xl font-black arabic-text text-indigo-700 hover:scale-105 active:scale-95 z-20 touch-none" draggable="true" data-val="${char}">${char}</div>
+            `).join('')}
+        </div>
+        <div id="spell-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-[2.5rem]">
+            <span class="text-6xl mb-4 animate-pop">⭐</span>
+            <h2 class="text-5xl font-black text-green-500 mb-6 arabic-text">مُمْتَاز!</h2>
+            <button onclick="nextSpell()" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-full shadow-lg">Next Word</button>
+        </div>
+    `;
+    spellArea.innerHTML = html;
+    setupDraggables(handleSpellDrop);
+}
+
+function handleSpellDrop(zone, val, el) {
+    if(zone.dataset.ans === val && zone.dataset.filled === "false") {
+        playSound('صَحِيح', null);
+        zone.innerHTML = `<span class="text-4xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
+        zone.classList.replace('border-dashed', 'border-solid');
+        zone.classList.replace('border-gray-300', 'border-green-400');
+        zone.dataset.filled = "true";
+        el.remove();
+        
+        const allFilled = Array.from(document.querySelectorAll('#spell-dropzones .dropzone')).every(z => z.dataset.filled === "true");
+        if(allFilled) {
+            playSound(LESSONS[currentLessonIdx].words[currentSpellIdx].joined, null);
+            setTimeout(() => {
+                const successEl = document.getElementById('spell-success');
+                if(successEl) successEl.classList.replace('hidden', 'flex');
+            }, 1000);
+        }
+        return true;
+    } else {
+        triggerVib();
+        zone.classList.add('bg-red-50', 'border-red-400');
+        setTimeout(() => {
+            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
+        }, 500);
+        return false;
+    }
+}
+window.nextSpell = () => {
+    currentSpellIdx = (currentSpellIdx + 1) % LESSONS[currentLessonIdx].words.length;
+    initSpellGame();
+}
+
+// --- GAME LOGIC: SENTENCE TRAIN ---
+let currentSentIdx = 0;
+function initSentenceGame() {
+    const sentArea = document.getElementById('sentence-game-area');
+    if (!sentArea) return;
+
+    const l = LESSONS[currentLessonIdx];
+    const s = l.sentences[currentSentIdx];
+    const words = [...s.words].sort(() => Math.random() - 0.5);
+
+    let html = `
+        <div class="text-7xl mb-8">${s.icon}</div>
+        <div class="flex justify-center flex-wrap gap-4 mb-12" dir="rtl" id="sent-dropzones">
+            ${s.words.map((w, i) => `
+                <div class="dropzone h-20 min-w-[120px] px-6 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center relative" data-ans="${w}" data-filled="false">
+                    <span class="text-xs text-gray-300 absolute -bottom-6">${i+1}</span>
+                </div>
+            `).join('')}
+        </div>
+        <div class="flex justify-center flex-wrap gap-4" dir="rtl" id="draggables-container">
+            ${words.map((w, i) => `
+                <div class="draggable bg-teal-50 border-b-4 border-teal-200 px-6 py-3 rounded-2xl flex items-center justify-center text-3xl font-black arabic-text text-teal-700 hover:scale-105 active:scale-95 z-20 touch-none" draggable="true" data-val="${w}">${w}</div>
+            `).join('')}
+        </div>
+        <div id="sent-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-[2.5rem]">
+            <h2 class="text-5xl font-black text-teal-500 mb-6 arabic-text">مُمْتَاز!</h2>
+            <button onclick="nextSent()" class="px-8 py-3 bg-teal-600 text-white font-bold rounded-full shadow-lg">Next Sentence</button>
+        </div>
+    `;
+    sentArea.innerHTML = html;
+    setupDraggables(handleSentDrop);
+}
+
+function handleSentDrop(zone, val, el) {
+    if(zone.dataset.ans === val && zone.dataset.filled === "false") {
+        playSound('صَحِيح', null);
+        zone.innerHTML = `<span class="text-3xl font-black arabic-text text-teal-600 animate-pop">${val}</span>`;
+        zone.classList.replace('border-dashed', 'border-solid');
+        zone.classList.replace('border-gray-300', 'border-teal-400');
+        zone.dataset.filled = "true";
+        el.remove();
+        
+        const allFilled = Array.from(document.querySelectorAll('#sent-dropzones .dropzone')).every(z => z.dataset.filled === "true");
+        if(allFilled) {
+            playSound(LESSONS[currentLessonIdx].sentences[currentSentIdx].full, null);
+            setTimeout(() => {
+                const successEl = document.getElementById('sent-success');
+                if(successEl) successEl.classList.replace('hidden', 'flex');
+            }, 1500);
+        }
+        return true;
+    } else {
+        triggerVib();
+        zone.classList.add('bg-red-50', 'border-red-400');
+        setTimeout(() => {
+            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
+        }, 500);
+        return false;
+    }
+}
+window.nextSent = () => {
+    currentSentIdx = (currentSentIdx + 1) % LESSONS[currentLessonIdx].sentences.length;
+    initSentenceGame();
+}
+
+// --- GAME LOGIC: MATCH EVERYTHING (Tab 2) ---
+function initMatchGame() {
+    const container = document.getElementById('match-game-area');
+    if (!container) return;
+
+    const l = LESSONS[currentLessonIdx];
+    let targets = []; let draggables = [];
+    
+    // Adapt based on lesson type
+    if(l.type === 'review') {
+        const pool = [...l.items].sort(() => Math.random() - 0.5).slice(0, 4);
+        targets = pool.map(i => ({ tgt: i.sound.toUpperCase(), val: i.char }));
+        draggables = pool.map(i => i.char);
+    } else if (l.type === 'shaddah') {
+        const pool = [...l.items].sort(() => Math.random() - 0.5).slice(0, 3);
+        targets = pool.map(i => ({ tgt: `${i.parts[0]} + ${i.parts[1]}`, val: i.joined, isBig: true }));
+        draggables = pool.map(i => i.joined);
+    } else if(l.type === 'shapes') {
+        const pool = [...l.items].sort(() => Math.random() - 0.5).slice(0, 3);
+        targets = pool.map(i => ({ tgt: i.word, val: i.base, isBig: true }));
+        draggables = pool.map(i => i.base);
+    } else if(l.type === 'words') {
+        const pool = [...l.words].sort(() => Math.random() - 0.5).slice(0, 4);
+        targets = pool.map(w => ({ tgt: (w.split||w.joined.split('')).join(' <span class="text-gray-300 text-lg">+</span> '), val: w.joined }));
+        draggables = pool.map(w => w.joined);
+    } else if (l.type === 'sentences') {
+        const pool = [...l.sentences].sort(() => Math.random() - 0.5).slice(0, 4);
+        targets = pool.map(s => ({ tgt: s.icon, val: s.full, isBig: true }));
+        draggables = pool.map(s => s.full);
+    } 
+
+    draggables.sort(() => Math.random() - 0.5);
+
+    let html = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12" dir="rtl" id="match-dropzones">
+            ${targets.map(t => `
+                <div class="bg-gray-50 p-4 rounded-3xl border-2 border-gray-200 flex items-center justify-between gap-4">
+                    <div class="text-3xl font-bold arabic-text text-gray-600 ${t.isBig?'text-4xl':''} flex-1 text-right pl-2">${t.tgt}</div>
+                    <div class="dropzone h-16 min-w-[100px] px-4 bg-white border-4 border-dashed border-gray-300 rounded-2xl flex items-center justify-center shadow-inner relative flex-shrink-0" data-ans="${t.val}" data-filled="false">
+                        <span class="text-gray-300 text-xs pointer-events-none">Drop here</span>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        <div class="flex justify-center flex-wrap gap-4 w-full p-6 bg-gray-50 rounded-3xl border-2 border-gray-100" id="draggables-container" dir="rtl">
+            ${draggables.map(d => `
+                <div class="draggable bg-white shadow-md border-b-4 border-indigo-200 px-6 py-3 rounded-2xl flex items-center justify-center hover:scale-105 z-20 touch-none" draggable="true" data-val="${d}">
+                    <span class="text-2xl font-black arabic-text text-indigo-600 pointer-events-none">${d}</span>
+                </div>
+            `).join('')}
+        </div>
+        <div id="match-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-[2.5rem]">
+            <i data-lucide="award" class="w-24 h-24 text-yellow-400 animate-pop mb-6"></i>
+            <h2 class="text-5xl font-black text-indigo-600 arabic-text mb-8">مُمْتَاز!</h2>
+            <button onclick="initMatchGame()" class="px-8 py-4 bg-indigo-600 text-white font-black text-xl rounded-full shadow-lg">Play Again 🔄</button>
+        </div>
+    `;
+    container.innerHTML = html;
+    lucide.createIcons();
+    setupDraggables(handleMatchDrop);
+}
+
+function handleMatchDrop(zone, val, el) {
+    if(zone.dataset.ans === val && zone.dataset.filled === "false") {
+        playSound('صَحِيح', null);
+        zone.innerHTML = `<span class="text-2xl font-black arabic-text text-green-600 animate-pop leading-none pointer-events-none">${val}</span>`;
+        zone.classList.replace('border-dashed', 'border-solid');
+        zone.classList.replace('border-gray-300', 'border-green-400');
+        zone.classList.add('bg-green-50');
+        zone.dataset.filled = "true";
+        el.remove();
+        
+        const allFilled = Array.from(document.querySelectorAll('#match-dropzones .dropzone')).every(z => z.dataset.filled === "true");
+        if(allFilled) {
+            setTimeout(() => {
+                const successEl = document.getElementById('match-success');
+                if(successEl) successEl.classList.replace('hidden', 'flex');
+            }, 1000);
+        }
+        return true;
+    } else {
+        triggerVib();
+        zone.classList.add('bg-red-50', 'border-red-400');
+        setTimeout(() => {
+            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
+        }, 500);
+        return false;
+    }
+}
+
+// --- UNIVERSAL DRAG & DROP ENGINE ---
+function setupDraggables(dropHandler) {
+    const draggables = document.querySelectorAll('.draggable');
+    const dropzones = document.querySelectorAll('.dropzone');
+    let draggedItem = null; let initialTransform = '';
+
+    draggables.forEach(d => {
+        d.addEventListener('dragstart', (e) => {
+            draggedItem = d;
+            setTimeout(() => d.classList.add('is-dragging'), 0);
+            e.dataTransfer.setData('text/plain', d.dataset.val);
+        });
+        d.addEventListener('dragend', () => { d.classList.remove('is-dragging'); draggedItem = null; });
+        
+        d.addEventListener('touchstart', (e) => {
+            draggedItem = d;
+            initialTransform = d.style.transform;
+            d.style.position = 'absolute'; d.style.zIndex = '100';
+            document.body.appendChild(d);
+            moveEl(d, e.touches[0].clientX, e.touches[0].clientY);
+        }, {passive: false});
+
+        d.addEventListener('touchmove', (e) => {
+            e.preventDefault(); 
+            if (!draggedItem) return;
+            const touch = e.touches[0];
+            moveEl(draggedItem, touch.clientX, touch.clientY);
+            
+            dropzones.forEach(z => {
+                const r = z.getBoundingClientRect();
+                if (touch.clientX >= r.left && touch.clientX <= r.right && touch.clientY >= r.top && touch.clientY <= r.bottom) {
+                    if(z.dataset.filled !== "true" && !z.classList.contains('draggable-placed')) z.classList.add('dragover');
+                } else z.classList.remove('dragover');
+            });
+        }, {passive: false});
+
+        d.addEventListener('touchend', (e) => {
+            if (!draggedItem) return;
+            const touch = e.changedTouches[0];
+            let dropped = false;
+
+            dropzones.forEach(z => {
+                const r = z.getBoundingClientRect();
+                if (touch.clientX >= r.left && touch.clientX <= r.right && touch.clientY >= r.top && touch.clientY <= r.bottom) {
+                    if(z.dataset.filled !== "true" && !z.classList.contains('draggable-placed')) {
+                        dropped = dropHandler(z, draggedItem.dataset.val, draggedItem);
+                    }
+                }
+                z.classList.remove('dragover');
+            });
+
+            if (!dropped) {
+                draggedItem.style.position = 'relative';
+                draggedItem.style.left = 'auto'; draggedItem.style.top = 'auto';
+                draggedItem.style.transform = initialTransform;
+                const container = document.getElementById('draggables-container');
+                if(container) container.appendChild(draggedItem);
+            }
+            draggedItem = null;
+        });
+    });
+
+    dropzones.forEach(z => {
+        z.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if(z.dataset.filled !== "true" && !z.classList.contains('draggable-placed')) z.classList.add('dragover');
+        });
+        z.addEventListener('dragleave', () => z.classList.remove('dragover'));
+        z.addEventListener('drop', (e) => {
+            e.preventDefault();
+            z.classList.remove('dragover');
+            const val = e.dataTransfer.getData('text/plain');
+            const el = document.querySelector(`.draggable[data-val="${val}"]`);
+            if(el) dropHandler(z, val, el);
+        });
+    });
+}
+function moveEl(el, x, y) { el.style.left = (x - el.offsetWidth/2) + 'px'; el.style.top = (y - el.offsetHeight/2) + 'px'; }
+
+// --- NAVIGATION ---
+window.changeLesson = function(idx) { 
+    currentLessonIdx = idx; 
+    currentTab = 0; 
+    const scrollArea = document.getElementById('main-scroll-area');
+    if(scrollArea) scrollArea.scrollTop = 0; 
+    updateAll(); 
+}
+
+window.changeTab = function(idx) { 
+    currentTab = idx; 
+    const scrollArea = document.getElementById('main-scroll-area');
+    if(scrollArea) scrollArea.scrollTop = 0; 
+    updateAll(); 
+}
+
+window.prevLesson = function() {
+    if (currentLessonIdx > 0) changeLesson(currentLessonIdx - 1);
+}
+
+window.nextLesson = function() {
+    if (currentLessonIdx < LESSONS.length - 1) changeLesson(currentLessonIdx + 1);
+}
+
+function updateButtons() {
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    if(btnPrev) {
+        btnPrev.disabled = currentLessonIdx === 0;
+        btnPrev.style.opacity = currentLessonIdx === 0 ? '0.5' : '1';
+        btnPrev.style.cursor = currentLessonIdx === 0 ? 'not-allowed' : 'pointer';
+    }
+    if(btnNext) {
+        btnNext.disabled = currentLessonIdx === LESSONS.length - 1;
+        btnNext.style.opacity = currentLessonIdx === LESSONS.length - 1 ? '0.5' : '1';
+        btnNext.style.cursor = currentLessonIdx === LESSONS.length - 1 ? 'not-allowed' : 'pointer';
+    }
+}
+
+function updateAll() { 
+    renderSidebar(); 
+    renderTabs(); 
+    renderMainContent(); 
+    updateButtons();
+}
+
+// --- INIT ---
+updateAll();
+
+</script>
 </body>
 </html>
