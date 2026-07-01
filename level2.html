@@ -30,8 +30,8 @@
         .is-dragging { opacity: 0.5; z-index: 50; pointer-events: none; }
 
         /* Quran Highlight */
-        .quran-verse { transition: all 0.3s ease; cursor: pointer; }
-        .quran-verse.active { color: #10B981; transform: scale(1.05); text-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .quran-verse { transition: all 0.3s ease; }
+        .quran-verse.active { color: #10B981; transform: scale(1.03); text-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .quran-verse:hover { color: #059669; }
     </style>
 </head>
@@ -214,6 +214,15 @@ let currentLessonIdx = 0;
 let currentTab = 0; 
 let currentAudio = null;
 
+// Fatihah specialized state
+let fatihahState = {
+    isPlayingFull: false,
+    repeatCount: 1,
+    currentAyahRepeats: 0,
+    currentVerseId: 1,
+    speeds: {1:1, 2:1, 3:1, 4:1, 5:1, 6:1, 7:1}
+};
+
 // --- AUDIO LOGIC ---
 function playSound(text, btnElement) {
     if(btnElement) {
@@ -224,6 +233,9 @@ function playSound(text, btnElement) {
     }
     if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
     window.speechSynthesis.cancel();
+
+    // Ensure fatihah state resets if standard sound played
+    fatihahState.isPlayingFull = false; 
 
     const speakText = () => {
         if ('speechSynthesis' in window) {
@@ -272,7 +284,8 @@ function renderTabs() {
     if (!tc) return;
 
     if (l.type === 'fatihah') {
-        tc.innerHTML = `<div class="p-3 font-black text-emerald-700 bg-emerald-100 rounded-full px-8 shadow-inner border border-emerald-200">The Final Goal 📖</div>`;
+        tc.innerHTML = `<div class="p-3 font-black text-emerald-700 bg-emerald-100 rounded-full px-8 shadow-inner border border-emerald-200 flex gap-2 items-center"><i data-lucide="book" class="w-5 h-5"></i> The Final Goal</div>`;
+        lucide.createIcons();
         return;
     }
 
@@ -305,7 +318,11 @@ function renderMainContent() {
     let html = '';
 
     if (l.type === 'fatihah') {
-        html = `<div class="animate-fade-in text-center max-w-2xl mx-auto"><h2 class="text-4xl font-black mb-2 text-emerald-600 arabic-text">سُورَةُ الْفَاتِحَة</h2><p class="text-gray-500 font-bold mb-8">Listen to the Qari and follow along!</p><div id="fatihah-container" class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border-4 border-emerald-50 flex flex-col gap-6"></div></div>`;
+        html = `<div class="animate-fade-in text-center max-w-4xl mx-auto">
+                    <h2 class="text-4xl font-black mb-2 text-emerald-600 arabic-text">سُورَةُ الْفَاتِحَة</h2>
+                    <p class="text-gray-500 font-bold mb-8">Listen to the Qari and follow along!</p>
+                    <div id="fatihah-container" class="bg-white p-4 md:p-10 rounded-[3rem] shadow-2xl border-4 border-emerald-50 flex flex-col gap-6"></div>
+                </div>`;
         container.innerHTML = html;
         initFatihah();
         return;
@@ -623,7 +640,7 @@ function initSentenceGame() {
         <div class="text-7xl mb-8">${s.icon}</div>
         <div class="flex justify-center flex-wrap gap-4 mb-12" dir="rtl" id="multi-dropzones">
             ${s.words.map((w, i) => `
-                <div class="dropzone h-20 min-w-[80px] md:min-w-[100px] px-4 md:px-6 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center relative" data-ans="${w}" data-filled="false">
+                <div class="dropzone h-16 md:h-20 min-w-[80px] md:min-w-[100px] px-4 md:px-6 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center relative" data-ans="${w}" data-filled="false">
                     <span class="text-xs text-gray-300 absolute -bottom-6">${i+1}</span>
                 </div>
             `).join('')}
@@ -742,7 +759,7 @@ window.revealXray = (btn, secret) => {
     if(target.innerText !== secret) {
         target.style.transform = 'scale(1.2)'; target.style.color = '#10B981'; 
         target.innerText = secret;
-        setTimeout(() => { playSound(secret, null); }, 200);
+        // Just say the word naturally, no Swaheeh sound
     }
 }
 
@@ -777,8 +794,9 @@ function handleMultiDrop(zone, val, el, finalSoundText) {
         
         const allFilled = Array.from(document.querySelectorAll('#multi-dropzones .dropzone')).every(z => z.dataset.filled === "true");
         if(allFilled) {
-            playSound(finalSoundText, null);
+            if(finalSoundText !== "مُمْتَاز") playSound(finalSoundText, null);
             setTimeout(() => {
+                if(finalSoundText === "مُمْتَاز") playSound(finalSoundText, null);
                 const successEl = document.getElementById('multi-success');
                 if(successEl) successEl.classList.replace('hidden', 'flex');
             }, 1000);
@@ -897,30 +915,105 @@ function initFatihah() {
     const container = document.getElementById('fatihah-container');
     if (!container) return;
 
+    // Reset state
+    fatihahState.isPlayingFull = false;
+    fatihahState.currentAyahRepeats = 0;
+
     container.innerHTML = `
-        <div class="flex flex-col items-center gap-6" dir="rtl">
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button id="btn-play-full" onclick="toggleFullSurah()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 md:py-3 px-6 rounded-full shadow-md transition-colors flex items-center gap-2">
+                ▶️ Play Full Surah
+            </button>
+            <div class="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100 shadow-sm">
+                <span class="font-bold text-emerald-700 text-xs md:text-sm">Repeat Each:</span>
+                <select onchange="updateRepeat(this.value)" class="bg-white border border-emerald-200 rounded-lg p-1 text-emerald-700 font-bold outline-none cursor-pointer">
+                    <option value="1">1x</option>
+                    <option value="2">2x</option>
+                    <option value="3">3x</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex flex-col gap-4 w-full" dir="rtl">
             ${l.verses.map(v => `
-                <div id="verse-${v.id}" onclick="playQuranVerse(${v.id})" class="quran-verse text-3xl md:text-5xl font-black arabic-text text-gray-800 text-center leading-loose hover:bg-emerald-50 rounded-2xl p-4 w-full">
-                    ${v.ar} <span class="text-emerald-300 text-2xl font-sans ml-2">﴿${v.id}﴾</span>
+                <div class="flex items-center justify-between w-full hover:bg-emerald-50/50 rounded-2xl p-2 md:p-4 transition-colors border border-transparent hover:border-emerald-100 group relative">
+                    <div id="verse-${v.id}" onclick="playSingleVerse(${v.id})" class="quran-verse text-3xl md:text-5xl font-black arabic-text text-gray-800 text-right leading-loose flex-1 py-2">
+                        ${v.ar} <span class="text-emerald-300 text-2xl font-sans ml-1">﴿${v.id}﴾</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-center gap-1 ml-4 opacity-70 group-hover:opacity-100 transition-opacity">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Speed</span>
+                        <select onchange="updateSpeed(${v.id}, this.value)" class="text-xs font-bold bg-white border border-gray-200 rounded-lg p-1 text-gray-600 outline-none cursor-pointer shadow-sm" dir="ltr">
+                            <option value="0.5">0.5x</option>
+                            <option value="0.75">0.75x</option>
+                            <option value="1" selected>1.0x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                        </select>
+                    </div>
                 </div>
             `).join('')}
         </div>
     `;
 }
-window.playQuranVerse = function(verseId) {
+
+window.updateRepeat = function(val) { fatihahState.repeatCount = parseInt(val); };
+window.updateSpeed = function(id, val) { 
+    fatihahState.speeds[id] = parseFloat(val);
+    if (currentAudio && fatihahState.currentVerseId === id) { currentAudio.playbackRate = parseFloat(val); }
+};
+
+window.toggleFullSurah = function() {
+    if (fatihahState.isPlayingFull) {
+        fatihahState.isPlayingFull = false;
+        if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+        document.querySelectorAll('.quran-verse').forEach(el => el.classList.remove('active'));
+        document.getElementById('btn-play-full').innerHTML = '▶️ Play Full Surah';
+    } else {
+        fatihahState.isPlayingFull = true;
+        fatihahState.currentVerseId = 1;
+        fatihahState.currentAyahRepeats = 0;
+        document.getElementById('btn-play-full').innerHTML = '⏹️ Stop Surah';
+        playQuranVerse(1, true);
+    }
+};
+
+window.playSingleVerse = function(verseId) {
+    if (fatihahState.isPlayingFull) {
+        fatihahState.isPlayingFull = false;
+        document.getElementById('btn-play-full').innerHTML = '▶️ Play Full Surah';
+    }
+    playQuranVerse(verseId, false);
+};
+
+window.playQuranVerse = function(verseId, isFullPlay = false) {
     if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
     document.querySelectorAll('.quran-verse').forEach(el => el.classList.remove('active'));
     
+    fatihahState.currentVerseId = verseId;
     const el = document.getElementById(`verse-${verseId}`);
     if (el) el.classList.add('active');
 
-    // Mishary Alafasy Audio API
     const audioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${verseId}.mp3`;
     currentAudio = new Audio(audioUrl);
+    currentAudio.playbackRate = fatihahState.speeds[verseId] || 1;
     currentAudio.play();
+
     currentAudio.onended = () => {
         if (el) el.classList.remove('active');
-        if (verseId < 7) setTimeout(() => playQuranVerse(verseId + 1), 500);
+        
+        if (fatihahState.isPlayingFull) {
+            fatihahState.currentAyahRepeats++;
+            if (fatihahState.currentAyahRepeats < fatihahState.repeatCount) {
+                setTimeout(() => playQuranVerse(verseId, true), 500);
+            } else {
+                fatihahState.currentAyahRepeats = 0;
+                if (verseId < 7) {
+                    setTimeout(() => playQuranVerse(verseId + 1, true), 500);
+                } else {
+                    fatihahState.isPlayingFull = false;
+                    document.getElementById('btn-play-full').innerHTML = '▶️ Play Full Surah';
+                }
+            }
+        }
     };
 }
 
