@@ -24,6 +24,11 @@
         .draggable:active { cursor: grabbing; }
         .dropzone.dragover { transform: scale(1.05); border-color: #10B981; background-color: #F0FDF4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); }
         .is-dragging { opacity: 0.5; z-index: 50; pointer-events: none; }
+
+        /* Quran Highlight */
+        .quran-verse { transition: all 0.3s ease; cursor: pointer; }
+        .quran-verse.active { color: #10B981; transform: scale(1.05); text-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .quran-verse:hover { color: #059669; }
     </style>
 </head>
 <body class="text-slate-800 h-screen w-full flex flex-col md:flex-row overflow-hidden no-select bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
@@ -57,86 +62,143 @@
         <div class="bg-white border-t p-3 md:p-4 flex justify-between items-center z-10 flex-shrink-0">
             <button id="btn-prev" onclick="prevLesson()" class="flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-gray-100 text-gray-700 hover:bg-gray-200">
                 <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                <span class="hidden sm:inline">Previous Lesson</span><span class="sm:hidden">Prev</span>
+                <span class="hidden sm:inline">Previous</span><span class="sm:hidden">Prev</span>
             </button>
             <button id="btn-next" onclick="nextLesson()" class="flex items-center gap-1 md:gap-2 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold transition-colors text-sm md:text-base bg-emerald-500 text-white hover:bg-emerald-600 shadow-md">
-                <span class="hidden sm:inline">Next Lesson</span><span class="sm:hidden">Next</span>
+                <span class="hidden sm:inline">Next</span><span class="sm:hidden">Next</span>
                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
             </button>
         </div>
     </div>
 
 <script>
-// --- FULL LEVEL 2 CURRICULUM ---
+// --- FULL 21-LESSON CURRICULUM ---
 const ALPHABET = ['أ','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
 
 const LESSONS = [
+    // MODULE 1: Foundations
     {
-        id: 1, type: 'review', title: 'Remember Harakat', desc: 'Short vowels check!', color: 'bg-blue-100', accent: 'bg-blue-500', text: 'text-blue-600', border: 'border-blue-500',
+        id: 1, mod: 1, type: 'review', title: 'Remember Harakat', desc: 'Short vowels', color: 'bg-blue-100', accent: 'bg-blue-500', text: 'text-blue-600', border: 'border-blue-500',
         items: [ { char: 'سَ', sound: 'sa' }, { char: 'مِ', sound: 'mi' }, { char: 'رُ', sound: 'ru' }, { char: 'قَ', sound: 'qa' }, { char: 'لِ', sound: 'li' }, { char: 'بُ', sound: 'bu' } ]
     },
     {
-        id: 2, type: 'review', title: 'Remember Tanween', desc: 'Double vowels check!', color: 'bg-purple-100', accent: 'bg-purple-500', text: 'text-purple-600', border: 'border-purple-500',
+        id: 2, mod: 1, type: 'review', title: 'Remember Tanween', desc: 'Double vowels', color: 'bg-purple-100', accent: 'bg-purple-500', text: 'text-purple-600', border: 'border-purple-500',
         items: [ { char: 'بً', sound: 'ban' }, { char: 'تٍ', sound: 'tin' }, { char: 'جٌ', sound: 'jun' }, { char: 'دً', sound: 'dan' }, { char: 'طٍ', sound: 'tin' }, { char: 'عٌ', sound: 'un' } ]
     },
     {
-        id: 3, type: 'shaddah', title: 'The Shaddah', desc: 'Double Consonants!', color: 'bg-rose-100', accent: 'bg-rose-500', text: 'text-rose-600', border: 'border-rose-500',
+        id: 3, mod: 1, type: 'tricky', title: 'Tricky Sounds', desc: 'Listen carefully!', color: 'bg-indigo-100', accent: 'bg-indigo-500', text: 'text-indigo-600', border: 'border-indigo-500',
         items: [ 
-            { parts: ['مْ', 'مَ'], joined: 'مَّ', sound: 'mma' }, 
-            { parts: ['بْ', 'بُ'], joined: 'بُّ', sound: 'bbu' }, 
-            { parts: ['دْ', 'دِ'], joined: 'دِّ', sound: 'ddi' }, 
-            { parts: ['طْ', 'طَ'], joined: 'طَّ', sound: 'tta' } 
+            { pair: ['س', 'ص'], ans: 'ص', word: 'صَقْر', icon: '🦅' }, { pair: ['ت', 'ط'], ans: 'ط', word: 'طَائِرَة', icon: '✈️' }, 
+            { pair: ['ق', 'ك'], ans: 'ق', word: 'قَمَر', icon: '🌙' }, { pair: ['ذ', 'ز'], ans: 'ز', word: 'زَرَافَة', icon: '🦒' } 
         ]
     },
     {
-        id: 4, type: 'shapes', title: 'Letter Shapes', desc: 'Beginning, Middle, End!', color: 'bg-pink-100', accent: 'bg-pink-500', text: 'text-pink-600', border: 'border-pink-500',
+        id: 4, mod: 1, type: 'shaddah', title: 'The Shaddah', desc: 'Double Consonants!', color: 'bg-rose-100', accent: 'bg-rose-500', text: 'text-rose-600', border: 'border-rose-500',
+        items: [ { parts: ['مْ', 'مَ'], joined: 'مَّ', tts: 'أَمَّ' }, { parts: ['بْ', 'بُ'], joined: 'بُّ', tts: 'أَبُّ' }, { parts: ['دْ', 'دِ'], joined: 'دِّ', tts: 'أَدِّ' }, { parts: ['طْ', 'طَ'], joined: 'طَّ', tts: 'أَطَّ' } ]
+    },
+    {
+        id: 5, mod: 1, type: 'shapes', title: 'Letter Shapes', desc: 'Beg, Mid, End!', color: 'bg-pink-100', accent: 'bg-pink-500', text: 'text-pink-600', border: 'border-pink-500',
         items: [
             { base: 'ب', beg: 'بـ', mid: 'ـبـ', end: 'ـب', word: 'بَيْت', parts: ['', 'يْت'], ans: 'بـ' },
+            { base: 'س', beg: 'سـ', mid: 'ـسـ', end: 'ـس', word: 'سَمَك', parts: ['', 'َمَك'], ans: 'سـ' },
             { base: 'ع', beg: 'عـ', mid: 'ـعـ', end: 'ـع', word: 'مَعَ', parts: ['مَـ', ''], ans: 'ـع' },
             { base: 'ج', beg: 'جـ', mid: 'ـجـ', end: 'ـج', word: 'مَسْجِد', parts: ['مَسْـ', 'ـِد'], ans: 'ـجـ' },
-            { base: 'د', beg: 'د', mid: 'ـد', end: 'ـد', word: 'دِيْك', parts: ['', 'ِيْك'], ans: 'د' },
+            { base: 'ك', beg: 'كـ', mid: 'ـكـ', end: 'ـك', word: 'سَمَك', parts: ['سَمَـ', ''], ans: 'ـك' },
             { base: 'ه', beg: 'هـ', mid: 'ـهـ', end: 'ـه', word: 'شَهْر', parts: ['شَـ', 'ـْر'], ans: 'ـهـ' },
-            { base: 'ي', beg: 'يـ', mid: 'ـيـ', end: 'ـي', word: 'كُرْسِي', parts: ['كُرْسِـ', ''], ans: 'ـي' },
-            { base: 'و', beg: 'و', mid: 'ـو', end: 'ـو', word: 'وَرْدَة', parts: ['', 'َرْدَة'], ans: 'و' }
+            { base: 'د', beg: 'د', mid: 'ـد', end: 'ـد', word: 'دِيك', parts: ['', 'ِيك'], ans: 'د' },
+            { base: 'ي', beg: 'يـ', mid: 'ـيـ', end: 'ـي', word: 'كُرْسِي', parts: ['كُرْسِـ', ''], ans: 'ـي' }
         ]
     },
+    // MODULE 2: Vocabulary
     {
-        id: 5, type: 'words', title: '2-Letter Words', desc: 'Simple words!', color: 'bg-emerald-100', accent: 'bg-emerald-500', text: 'text-emerald-600', border: 'border-emerald-500',
+        id: 6, mod: 2, type: 'words', title: '2-Letter Words', desc: 'Simple words!', color: 'bg-emerald-100', accent: 'bg-emerald-500', text: 'text-emerald-600', border: 'border-emerald-500',
         words: [
-            { split: ['أَ','ب'], joined: 'أَب', eng: 'Father', icon: '🧔‍♂️' },
-            { split: ['أُ','م'], joined: 'أُم', eng: 'Mother', icon: '🧕' },
-            { split: ['أَ','خ'], joined: 'أَخ', eng: 'Brother', icon: '👦' },
-            { split: ['يَ','د'], joined: 'يَد', eng: 'Hand', icon: '✋' },
-            { split: ['فَ','م'], joined: 'فَم', eng: 'Mouth', icon: '👄' }
+            { split: ['أَ','ب'], joined: 'أَب', eng: 'Father', icon: '🧔‍♂️' }, { split: ['أُ','م'], joined: 'أُم', eng: 'Mother', icon: '🧕' },
+            { split: ['أَ','خ'], joined: 'أَخ', eng: 'Brother', icon: '👦' }, { split: ['يَ','د'], joined: 'يَد', eng: 'Hand', icon: '✋' }
         ]
     },
     {
-        id: 6, type: 'words', title: '3-Letter Nouns', desc: 'Things around us!', color: 'bg-orange-100', accent: 'bg-orange-500', text: 'text-orange-600', border: 'border-orange-500',
+        id: 7, mod: 2, type: 'words', title: '3-Letter Nouns', desc: 'Things around us!', color: 'bg-orange-100', accent: 'bg-orange-500', text: 'text-orange-600', border: 'border-orange-500',
         words: [
-            { split: ['قَ','لَ','م'], joined: 'قَلَم', eng: 'Pen', icon: '🖊️' },
-            { split: ['قَ','مَ','ر'], joined: 'قَمَر', eng: 'Moon', icon: '🌙' },
-            { split: ['أَ','سَ','د'], joined: 'أَسَد', eng: 'Lion', icon: '🦁' },
-            { split: ['بَ','قَ','ر'], joined: 'بَقَر', eng: 'Cow', icon: '🐄' },
-            { split: ['و','ل','د'], joined: 'وَلَد', eng: 'Boy', icon: '👦' } 
+            { split: ['قَ','لَ','م'], joined: 'قَلَم', eng: 'Pen', icon: '🖊️' }, { split: ['قَ','مَ','ر'], joined: 'قَمَر', eng: 'Moon', icon: '🌙' },
+            { split: ['أَ','سَ','د'], joined: 'أَسَد', eng: 'Lion', icon: '🦁' }, { split: ['بَ','قَ','ر'], joined: 'بَقَر', eng: 'Cow', icon: '🐄' }
         ]
     },
     {
-        id: 7, type: 'words', title: '3-Letter Actions', desc: 'Doing words!', color: 'bg-red-100', accent: 'bg-red-500', text: 'text-red-600', border: 'border-red-500',
+        id: 8, mod: 2, type: 'words', title: '3-Letter Actions', desc: 'Doing words!', color: 'bg-red-100', accent: 'bg-red-500', text: 'text-red-600', border: 'border-red-500',
         words: [
-            { split: ['ك','ت','ب'], joined: 'كَتَبَ', eng: 'He Wrote', icon: '✍️' },
-            { split: ['ق','ر','أ'], joined: 'قَرَأَ', eng: 'He Read', icon: '📖' },
-            { split: ['أ','ك','ل'], joined: 'أَكَلَ', eng: 'He Ate', icon: '🍎' },
-            { split: ['ج','ل','س'], joined: 'جَلَسَ', eng: 'He Sat', icon: '🪑' },
-            { split: ['ش','ر','ب'], joined: 'شَرِبَ', eng: 'He Drank', icon: '💧' }
+            { split: ['ك','ت','ب'], joined: 'كَتَبَ', eng: 'He Wrote', icon: '✍️' }, { split: ['ق','ر','أ'], joined: 'قَرَأَ', eng: 'He Read', icon: '📖' },
+            { split: ['أ','ك','ل'], joined: 'أَكَلَ', eng: 'He Ate', icon: '🍎' }, { split: ['ج','ل','س'], joined: 'جَلَسَ', eng: 'He Sat', icon: '🪑' }
         ]
     },
     {
-        id: 8, type: 'sentences', title: 'Simple Sentences', desc: 'Read full sentences!', color: 'bg-teal-100', accent: 'bg-teal-500', text: 'text-teal-600', border: 'border-teal-500',
+        id: 9, mod: 2, type: 'order', title: 'Numbers (1-6)', desc: 'Count in Arabic', color: 'bg-sky-100', accent: 'bg-sky-500', text: 'text-sky-600', border: 'border-sky-500',
+        items: [ { ar: 'وَاحِد', num: '1', eng:'One' }, { ar: 'اِثْنَان', num: '2', eng:'Two' }, { ar: 'ثَلَاثَة', num: '3', eng:'Three' }, { ar: 'أَرْبَعَة', num: '4', eng:'Four' }, { ar: 'خَمْسَة', num: '5', eng:'Five' }, { ar: 'سِتَّة', num: '6', eng:'Six' } ]
+    },
+    {
+        id: 10, mod: 2, type: 'order', title: 'Numbers (7-12)', desc: 'Count higher!', color: 'bg-blue-100', accent: 'bg-blue-500', text: 'text-blue-600', border: 'border-blue-500',
+        items: [ { ar: 'سَبْعَة', num: '7', eng:'Seven' }, { ar: 'ثَمَانِيَة', num: '8', eng:'Eight' }, { ar: 'تِسْعَة', num: '9', eng:'Nine' }, { ar: 'عَشَرَة', num: '10', eng:'Ten' }, { ar: 'أَحَدَ عَشَرَ', num: '11', eng:'Eleven' }, { ar: 'اِثْنَا عَشَرَ', num: '12', eng:'Twelve' } ]
+    },
+    {
+        id: 11, mod: 2, type: 'order', title: 'Days of the Week', desc: 'Learn the days!', color: 'bg-amber-100', accent: 'bg-amber-500', text: 'text-amber-600', border: 'border-amber-500',
+        items: [ { ar: 'الْأَحَد', num: 'Sun', eng:'Sunday' }, { ar: 'الاِثْنَيْن', num: 'Mon', eng:'Monday' }, { ar: 'الثُّلَاثَاء', num: 'Tue', eng:'Tuesday' }, { ar: 'الْأَرْبِعَاء', num: 'Wed', eng:'Wednesday' }, { ar: 'الْخَمِيس', num: 'Thu', eng:'Thursday' }, { ar: 'الْجُمُعَة', num: 'Fri', eng:'Friday' }, { ar: 'السَّبْت', num: 'Sat', eng:'Saturday' } ]
+    },
+    {
+        id: 12, mod: 2, type: 'order', title: 'Hijri Months (1-6)', desc: 'First 6 months', color: 'bg-fuchsia-100', accent: 'bg-fuchsia-500', text: 'text-fuchsia-600', border: 'border-fuchsia-500',
+        items: [ { ar: 'مُحَرَّم', num: '1', eng:'Muharram' }, { ar: 'صَفَر', num: '2', eng:'Safar' }, { ar: 'رَبِيعُ الْأَوَّلِ', num: '3', eng:'Rabi I' }, { ar: 'رَبِيعُ الْآخِرِ', num: '4', eng:'Rabi II' }, { ar: 'جُمَادَى الْأُولَى', num: '5', eng:'Jumada I' }, { ar: 'جُمَادَى الْآخِرَةِ', num: '6', eng:'Jumada II' } ]
+    },
+    {
+        id: 13, mod: 2, type: 'order', title: 'Hijri Months (7-12)', desc: 'Last 6 months', color: 'bg-purple-100', accent: 'bg-purple-500', text: 'text-purple-600', border: 'border-purple-500',
+        items: [ { ar: 'رَجَب', num: '7', eng:'Rajab' }, { ar: 'شَعْبَان', num: '8', eng:'Sha\'ban' }, { ar: 'رَمَضَان', num: '9', eng:'Ramadan' }, { ar: 'شَوَّال', num: '10', eng:'Shawwal' }, { ar: 'ذُو الْقَعْدَةِ', num: '11', eng:'Dhul-Qa\'dah' }, { ar: 'ذُو الْحِجَّةِ', num: '12', eng:'Dhul-Hijjah' } ]
+    },
+    // MODULE 3: Sentences & Flow
+    {
+        id: 14, mod: 3, type: 'sorter', title: 'Sun & Moon Letters', desc: 'Shamsiyyah vs Qamariyyah', color: 'bg-yellow-100', accent: 'bg-yellow-500', text: 'text-yellow-600', border: 'border-yellow-500',
+        words: [ { word: 'الشَّمْس', type: 'sun', icon: '☀️' }, { word: 'التَّوَّاب', type: 'sun', icon: '☀️' }, { word: 'الْقَمَر', type: 'moon', icon: '🌙' }, { word: 'الْخَالِق', type: 'moon', icon: '🌙' } ]
+    },
+    {
+        id: 15, mod: 3, type: 'sentences', title: 'Simple Sentences', desc: 'Read full sentences!', color: 'bg-teal-100', accent: 'bg-teal-500', text: 'text-teal-600', border: 'border-teal-500',
         sentences: [
-            { words: ['هُوَ', 'أُسْتَاذ'], full: 'هُوَ أُسْتَاذ', icon: '👨‍🏫', eng: 'He is a teacher' },
-            { words: ['هَذَا', 'مُحَمَّد'], full: 'هَذَا مُحَمَّد', icon: '👦', eng: 'This is Muhammad' },
-            { words: ['الْبُسْتَانُ', 'جَمِيل'], full: 'الْبُسْتَانُ جَمِيل', icon: '🌷🌻', eng: 'The garden is beautiful' },
-            { words: ['ذَهَبْتُ', 'إِلَى', 'الْمَسْجِد'], full: 'ذَهَبْتُ إِلَى الْمَسْجِد', icon: '🕌 🚶‍♂️', eng: 'I went to the mosque' }
+            { words: ['هُوَ', 'أُسْتَاذ'], full: 'هُوَ أُسْتَاذ', icon: '👨‍🏫', eng: 'He is a teacher' }, { words: ['هَذَا', 'مُحَمَّد'], full: 'هَذَا مُحَمَّد', icon: '👦', eng: 'This is Muhammad' },
+            { words: ['الْبُسْتَانُ', 'جَمِيل'], full: 'الْبُسْتَانُ جَمِيل', icon: '🌷🌻', eng: 'The garden is beautiful' }, { words: ['ذَهَبْتُ', 'إِلَى', 'الْمَسْجِد'], full: 'ذَهَبْتُ إِلَى الْمَسْجِد', icon: '🕌 🚶‍♂️', eng: 'I went to the mosque' }
+        ]
+    },
+    {
+        id: 16, mod: 3, type: 'sentences', title: 'Beautiful Phrases', desc: 'Daily Dhikr!', color: 'bg-cyan-100', accent: 'bg-cyan-500', text: 'text-cyan-600', border: 'border-cyan-500',
+        sentences: [
+            { words: ['بِسْمِ', 'ٱللَّهِ'], full: 'بِسْمِ ٱللَّهِ', icon: '🤲', eng: 'In the name of Allah' }, { words: ['الْحَمْدُ', 'لِلَّهِ'], full: 'الْحَمْدُ لِلَّهِ', icon: '🤍', eng: 'Praise be to Allah' },
+            { words: ['سُبْحَانَ', 'ٱللَّهِ'], full: 'سُبْحَانَ ٱللَّهِ', icon: '✨', eng: 'Glory be to Allah' }, { words: ['اَللَّهُ', 'أَكْبَر'], full: 'اَللَّهُ أَكْبَر', icon: '🕋', eng: 'Allah is the greatest' }
+        ]
+    },
+    {
+        id: 17, mod: 3, type: 'sentences', title: 'Quranic Sentences', desc: 'Sentences from Quran', color: 'bg-emerald-100', accent: 'bg-emerald-500', text: 'text-emerald-600', border: 'border-emerald-500',
+        sentences: [
+            { words: ['فِيهِ', 'هُدًى', 'لِلْمُتَّقِينَ'], full: 'فِيهِ هُدًى لِلْمُتَّقِينَ', icon: '📖', eng: 'In it is guidance for the righteous' }, 
+            { words: ['وَٱللَّهُ', 'بِكُلِّ', 'شَيْءٍ', 'عَلِيمٌ'], full: 'وَٱللَّهُ بِكُلِّ شَيْءٍ عَلِيمٌ', icon: '✨', eng: 'And Allah is Knowing of all things' },
+            { words: ['إِنَّ', 'مَعَ', 'الْعُسْرِ', 'يُسْرًا'], full: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا', icon: '🌤️', eng: 'Indeed, with hardship is ease' }, 
+            { words: ['وَهُوَ', 'عَلَىٰ', 'كُلِّ', 'شَيْءٍ', 'قَدِيرٌ'], full: 'وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ', icon: '⚡', eng: 'And He is over all things competent' }
+        ]
+    },
+    // MODULE 4: Quranic Secrets
+    {
+        id: 18, mod: 4, type: 'xray', title: 'Hidden Letters', desc: 'The Dagger Alif', color: 'bg-violet-100', accent: 'bg-violet-500', text: 'text-violet-600', border: 'border-violet-500',
+        items: [ { word: 'هَـٰذَا', secret: 'هَاذَا', eng: 'This' }, { word: 'ذَٰلِكَ', secret: 'ذَالِكَ', eng: 'That' }, { word: 'إِلَـٰهُ', secret: 'إِلَاهُ', eng: 'God' }, { word: 'رَحْمَـٰنُ', secret: 'رَحْمَانُ', eng: 'Merciful' } ]
+    },
+    {
+        id: 19, mod: 4, type: 'xray', title: 'Shape Shifters', desc: 'Alif written as Yaa/Waw', color: 'bg-fuchsia-100', accent: 'bg-fuchsia-500', text: 'text-fuchsia-600', border: 'border-fuchsia-500',
+        items: [ { word: 'عِيسَى', secret: 'عِيسَا', eng: 'Jesus (Prophet)' }, { word: 'مُوسَى', secret: 'مُوسَا', eng: 'Moses (Prophet)' }, { word: 'صَلَوٰةٌ', secret: 'صَلَاةٌ', eng: 'Prayer' } ]
+    },
+    {
+        id: 20, mod: 4, type: 'review', title: 'Quran Initials', desc: 'Fawatihus-Suwar', color: 'bg-lime-100', accent: 'bg-lime-500', text: 'text-lime-600', border: 'border-lime-500',
+        items: [ { char: 'الم', sound: 'Alif Laam Meem' }, { char: 'يس', sound: 'Yaa Seen' }, { char: 'حم', sound: 'Haa Meem' }, { char: 'ص', sound: 'Saad' } ]
+    },
+    // MODULE 5: Final Goal
+    {
+        id: 21, mod: 5, type: 'fatihah', title: 'Surah Al-Fatihah', desc: 'Read with the Qari!', color: 'bg-emerald-100', accent: 'bg-emerald-600', text: 'text-emerald-700', border: 'border-emerald-600',
+        verses: [
+            { id: 1, ar: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ' }, { id: 2, ar: 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ' }, { id: 3, ar: 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ' },
+            { id: 4, ar: 'مَـٰلِكِ يَوْمِ ٱلدِّينِ' }, { id: 5, ar: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ' }, { id: 6, ar: 'ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ' },
+            { id: 7, ar: 'صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ' }
         ]
     }
 ];
@@ -178,12 +240,23 @@ function renderSidebar() {
     const list = document.getElementById('sidebar-list');
     if (!list) return;
     
-    list.innerHTML = LESSONS.map((l, idx) => `
-        <button onclick="changeLesson(${idx})" class="snap-center flex-none w-56 md:w-auto flex flex-col items-start p-4 rounded-2xl border-2 transition-all ${currentLessonIdx === idx ? `active-lesson ${l.border} ${l.color} shadow-md md:scale-105` : 'border-transparent bg-white hover:bg-gray-50'}">
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Unit ${l.id}</span>
-            <span class="text-lg font-black text-gray-800">${l.title}</span>
-        </button>
-    `).join('');
+    let currentMod = 0;
+    let html = '';
+    
+    LESSONS.forEach((l, idx) => {
+        if (l.mod !== currentMod) {
+            currentMod = l.mod;
+            let modTitle = ['Foundations', 'Vocabulary', 'Sentences & Flow', 'Quran Rules', 'The Quran'][currentMod-1];
+            html += `<div class="w-full text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest mt-4 mb-2 pl-2">Module ${currentMod}: ${modTitle}</div>`;
+        }
+        html += `
+            <button onclick="changeLesson(${idx})" class="w-full flex flex-col items-start p-3 rounded-2xl border-2 transition-all ${currentLessonIdx === idx ? `active-lesson ${l.border} ${l.color} shadow-md` : 'border-transparent bg-white hover:bg-gray-50 mb-1'}">
+                <span class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Unit ${l.id}</span>
+                <span class="text-sm md:text-base font-black text-gray-800 text-left leading-tight">${l.title}</span>
+            </button>
+        `;
+    });
+    list.innerHTML = html;
 }
 
 function renderTabs() {
@@ -191,19 +264,23 @@ function renderTabs() {
     const tc = document.getElementById('tabs-container');
     if (!tc) return;
 
-    let tab1Label = 'Build It!';
-    let tab1Icon = 'grid';
+    if (l.type === 'fatihah') {
+        tc.innerHTML = `<div class="p-3 font-black text-emerald-700 bg-emerald-100 rounded-full px-8 shadow-inner border border-emerald-200">The Final Goal 📖</div>`;
+        return;
+    }
+
+    let tab1Label = 'Build It!'; let tab1Icon = 'grid';
     if (l.type === 'words') { tab1Label = 'Spell It!'; tab1Icon = 'keyboard'; }
     if (l.type === 'sentences') { tab1Label = 'Train!'; tab1Icon = 'train'; }
     if (l.type === 'review') { tab1Label = 'Listen!'; tab1Icon = 'headphones'; }
     if (l.type === 'shapes') { tab1Label = 'Fix It!'; tab1Icon = 'wrench'; }
     if (l.type === 'shaddah') { tab1Label = 'Merge It!'; tab1Icon = 'combine'; }
+    if (l.type === 'order') { tab1Label = 'Order It!'; tab1Icon = 'list-ordered'; }
+    if (l.type === 'sorter') { tab1Label = 'Sort It!'; tab1Icon = 'split-square-vertical'; }
+    if (l.type === 'xray') { tab1Label = 'X-Ray!'; tab1Icon = 'search'; }
+    if (l.type === 'tricky') { tab1Label = 'Choose!'; tab1Icon = 'ear'; }
 
-    const t = [
-        { l: 'Learn', i: 'book-open' },
-        { l: tab1Label, i: tab1Icon },
-        { l: 'Match It!', i: 'puzzle' }
-    ];
+    const t = [ { l: 'Learn', i: 'book-open' }, { l: tab1Label, i: tab1Icon }, { l: 'Match It!', i: 'puzzle' } ];
     
     tc.innerHTML = t.map((tab, idx) => `
         <button onclick="changeTab(${idx})" class="flex flex-col items-center p-2 md:px-8 md:py-3 rounded-2xl transition-all flex-1 md:flex-none ${currentTab === idx ? `${l.color} ${l.text} shadow-inner font-black` : 'text-gray-500 hover:bg-gray-100 font-bold'}">
@@ -220,37 +297,64 @@ function renderMainContent() {
     
     let html = '';
 
+    if (l.type === 'fatihah') {
+        html = `<div class="animate-fade-in text-center max-w-2xl mx-auto"><h2 class="text-4xl font-black mb-2 text-emerald-600 arabic-text">سُورَةُ الْفَاتِحَة</h2><p class="text-gray-500 font-bold mb-8">Listen to the Qari and follow along!</p><div id="fatihah-container" class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border-4 border-emerald-50 flex flex-col gap-6"></div></div>`;
+        container.innerHTML = html;
+        initFatihah();
+        return;
+    }
+
     // --- TAB 0: LEARN ---
     if (currentTab === 0) {
         if(l.type === 'review') {
             html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">${l.title}</h2><div class="grid grid-cols-2 md:grid-cols-3 gap-6">` + 
                 l.items.map(i => `<button onclick="playSound('${i.sound}', this)" class="bg-white p-8 rounded-3xl shadow-md border-b-4 border-gray-200 hover:${l.border} transition-all active:scale-95"><span class="text-6xl font-black arabic-text">${i.char}</span></button>`).join('') + `</div></div>`;
+        } else if (l.type === 'tricky') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">Tricky Sounds!</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6">` + 
+                l.items.map(i => `<div class="bg-white p-8 rounded-3xl shadow-sm border-2 border-gray-100 flex flex-col items-center"><span class="text-6xl mb-4">${i.icon}</span><span class="text-4xl font-black arabic-text text-gray-800 mb-4">${i.word}</span><div class="flex gap-4"><span class="text-3xl font-bold arabic-text text-indigo-500">${i.pair[0]}</span><span class="text-3xl font-bold text-gray-300">vs</span><span class="text-3xl font-bold arabic-text text-indigo-500">${i.pair[1]}</span></div></div>`).join('') + `</div></div>`;
         } else if (l.type === 'shaddah') {
             html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">What is Shaddah?</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6">` + 
-                l.items.map(i => `<button onclick="playSound('${i.sound}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex flex-col items-center justify-center hover:scale-105 transition-all"><div class="text-4xl font-bold arabic-text text-gray-400 mb-2" dir="rtl">${i.parts[0]} + ${i.parts[1]} = </div><div class="text-7xl font-black arabic-text text-rose-600">${i.joined}</div></button>`).join('') + `</div></div>`;
+                l.items.map(i => `<button onclick="playSound('${i.tts}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex flex-col items-center justify-center hover:scale-105 transition-all"><div class="text-4xl font-bold arabic-text text-gray-400 mb-2" dir="rtl">${i.parts[0]} + ${i.parts[1]} = </div><div class="text-7xl font-black arabic-text text-rose-600">${i.joined}</div></button>`).join('') + `</div></div>`;
         } else if (l.type === 'shapes') {
             html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">How Letters Join</h2><div class="flex flex-col gap-4">` +
                 l.items.map(i => `<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center text-4xl font-bold arabic-text" dir="rtl"><span class="text-gray-400 w-16">${i.base}</span><span class="w-16">${i.beg}</span><span class="w-16">${i.mid}</span><span class="w-16">${i.end}</span></div>`).join('') + `</div></div>`;
         } else if (l.type === 'words') {
             html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">Read the Words!</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6">` +
-                l.words.map(w => `<button onclick="playSound('${w.joined}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex flex-col items-center gap-4 hover:scale-105 transition-all"><span class="text-6xl">${w.icon}</span><span class="text-5xl font-black arabic-text text-indigo-600">${w.joined}</span><span class="text-gray-400 font-bold uppercase">${w.eng}</span></button>`).join('') + `</div></div>`;
+                l.words.map(w => `<button onclick="playSound('${w.joined}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex flex-col items-center gap-4 hover:scale-105 transition-all"><span class="text-6xl">${w.icon}</span><span class="text-5xl font-black arabic-text ${l.text}">${w.joined}</span><span class="text-gray-400 font-bold uppercase">${w.eng}</span></button>`).join('') + `</div></div>`;
         } else if (l.type === 'sentences') {
             html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">Read Sentences!</h2><div class="flex flex-col gap-6">` +
-                l.sentences.map(s => `<button onclick="playSound('${s.full}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex items-center justify-between hover:scale-[1.02] transition-all" dir="rtl"><span class="text-6xl">${s.icon}</span><div class="flex flex-col items-start"><span class="text-4xl font-black arabic-text text-indigo-600">${s.full}</span><span class="text-gray-400 font-bold uppercase mt-2">${s.eng}</span></div></button>`).join('') + `</div></div>`;
+                l.sentences.map(s => `<button onclick="playSound('${s.full}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex items-center justify-between hover:scale-[1.02] transition-all" dir="rtl"><span class="text-6xl w-24 text-center">${s.icon}</span><div class="flex flex-col items-start"><span class="text-3xl md:text-4xl font-black arabic-text ${l.text}">${s.full}</span><span class="text-gray-400 font-bold uppercase mt-2">${s.eng}</span></div></button>`).join('') + `</div></div>`;
+        } else if (l.type === 'order') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">Read & Learn!</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">` +
+                l.items.map(i => `<button onclick="playSound('${i.ar}', this)" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-100 flex items-center justify-between hover:scale-105 transition-all"><span class="text-3xl md:text-4xl font-black text-gray-300 w-12">${i.num}</span><div class="text-right flex-1"><div class="text-3xl md:text-4xl font-black arabic-text ${l.text}" dir="rtl">${i.ar}</div><div class="text-gray-400 font-bold uppercase mt-1">${i.eng}</div></div></button>`).join('') + `</div></div>`;
+        } else if (l.type === 'sorter') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">Sun vs Moon</h2><div class="flex flex-col gap-8 bg-white p-8 rounded-3xl shadow-sm"><div class="flex justify-around items-center"><div class="text-center"><span class="text-6xl">☀️</span><h3 class="text-xl font-bold mt-2 text-orange-500">Shamsiyyah</h3><p class="text-sm text-gray-400">Skip the Laam!</p></div><div class="text-center"><span class="text-6xl">🌙</span><h3 class="text-xl font-bold mt-2 text-indigo-500">Qamariyyah</h3><p class="text-sm text-gray-400">Read the Laam!</p></div></div><div class="grid grid-cols-2 gap-4">` +
+                l.words.map(w => `<button onclick="playSound('${w.word}', this)" class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-3xl font-black arabic-text text-gray-800 hover:scale-105 transition-transform">${w.word}</button>`).join('') + `</div></div></div>`;
+        } else if (l.type === 'xray') {
+            html = `<div class="animate-fade-in text-center"><h2 class="text-3xl font-black mb-8">Magic Words Rule!</h2><p class="text-gray-500 mb-6 font-bold">See how the hidden letters work.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6">` +
+                l.items.map(i => `<button onclick="playSound('${i.secret}', this)" class="bg-white p-8 rounded-3xl shadow-md border-b-4 border-gray-200 hover:${l.border} transition-all active:scale-95 group"><div class="text-4xl md:text-5xl font-black arabic-text text-gray-800 mb-4">${i.word}</div><div class="text-lg font-bold text-gray-400 mb-2">is read exactly as</div><div class="text-4xl md:text-5xl font-black arabic-text ${l.text}">${i.secret}</div><div class="text-gray-400 font-bold uppercase mt-4">${i.eng}</div></button>`).join('') + `</div></div>`;
         }
     } 
-    // --- TAB 1: BUILD / SPELL ---
+    // --- TAB 1: BUILD / SPELL / PLAY ---
     else if (currentTab === 1) {
         if (l.type === 'review') {
             html = `<div class="text-center animate-fade-in"><h2 class="text-2xl font-black mb-4">Listening Game</h2><p class="mb-8">Click the speaker, then pick the correct card!</p><div class="bg-white p-10 rounded-3xl shadow-lg inline-block mb-8"><button onclick="playTargetSound()" class="bg-indigo-100 text-indigo-600 p-6 rounded-full hover:scale-110 transition-transform"><i data-lucide="volume-2" class="w-12 h-12"></i></button></div><div id="review-options" class="flex justify-center gap-6 flex-wrap"></div></div>`;
+        } else if (l.type === 'tricky') {
+            html = `<div class="text-center animate-fade-in"><h2 class="text-2xl font-black mb-4">Tricky Game</h2><p class="mb-8 text-gray-500">Listen to the word and choose the starting letter!</p><div class="bg-white p-10 rounded-[3rem] shadow-xl inline-block mb-8 relative" id="tricky-game-area"></div></div>`;
         } else if (l.type === 'shaddah') {
-            html = `<div class="text-center animate-fade-in w-full max-w-2xl mx-auto"><h2 class="text-2xl font-black mb-8">Merge the Letters!</h2><p class="mb-6 text-gray-500">Drag the double letter to finish the math.</p><div id="shaddah-game-area" class="bg-white p-8 rounded-3xl shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+            html = `<div class="text-center animate-fade-in w-full max-w-2xl mx-auto"><h2 class="text-2xl font-black mb-8">Merge the Letters!</h2><div id="shaddah-game-area" class="bg-white p-8 rounded-[3rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
         } else if (l.type === 'shapes') {
-            html = `<div class="text-center animate-fade-in w-full max-w-2xl mx-auto"><h2 class="text-2xl font-black mb-8">Shape Shifter!</h2><p class="mb-6 text-gray-500">Drag the correct shape to fix the word.</p><div id="shape-game-area" class="bg-white p-8 rounded-3xl shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+            html = `<div class="text-center animate-fade-in w-full max-w-2xl mx-auto"><h2 class="text-2xl font-black mb-8">Shape Shifter!</h2><div id="shape-game-area" class="bg-white p-8 rounded-[3rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
         } else if (l.type === 'words') {
             html = `<div class="text-center animate-fade-in"><h2 class="text-2xl font-black mb-2">The Spelling Bee</h2><p class="mb-8 text-gray-500">Drag letters in order to spell the word.</p><div id="spell-game-area" class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
         } else if (l.type === 'sentences') {
-            html = `<div class="text-center animate-fade-in"><h2 class="text-2xl font-black mb-2">Sentence Train</h2><p class="mb-8 text-gray-500">Drag the words in order to match the picture.</p><div id="sentence-game-area" class="bg-white p-8 rounded-[2.5rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+            html = `<div class="text-center animate-fade-in"><h2 class="text-2xl font-black mb-2">Sentence Train</h2><p class="mb-8 text-gray-500">Drag words in order.</p><div id="sentence-game-area" class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+        } else if (l.type === 'order') {
+            html = `<div class="text-center animate-fade-in w-full max-w-4xl mx-auto"><h2 class="text-2xl font-black mb-2">Order the Train!</h2><p class="mb-8 text-gray-500">Drag items into the correct order.</p><div id="order-game-area" class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+        } else if (l.type === 'sorter') {
+            html = `<div class="text-center animate-fade-in w-full max-w-3xl mx-auto"><h2 class="text-2xl font-black mb-2">Sky Sorter!</h2><p class="mb-8 text-gray-500">Drag into the Sun or Moon bucket.</p><div id="sorter-game-area" class="bg-white p-8 rounded-[2.5rem] shadow-xl border-4 border-gray-50 relative overflow-hidden"></div></div>`;
+        } else if (l.type === 'xray') {
+            html = `<div class="text-center animate-fade-in w-full max-w-3xl mx-auto"><h2 class="text-2xl font-black mb-2">X-Ray Glasses!</h2><p class="mb-8 text-gray-500">Click the cards to reveal the hidden letters.</p><div id="xray-game-area" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div></div>`;
         }
     } 
     // --- TAB 2: MATCH ---
@@ -264,53 +368,93 @@ function renderMainContent() {
     // Init specific games
     if (currentTab === 1) {
         if(l.type === 'review') initReviewGame();
+        else if(l.type === 'tricky') initTrickyGame();
         else if(l.type === 'shaddah') initShaddahGame();
         else if(l.type === 'shapes') initShapeGame();
         else if(l.type === 'words') initSpellGame();
         else if(l.type === 'sentences') initSentenceGame();
+        else if(l.type === 'order') initOrderGame();
+        else if(l.type === 'sorter') initSorterGame();
+        else if(l.type === 'xray') initXrayGame();
     } else if (currentTab === 2) {
         initMatchGame();
     }
 }
 
-// --- GAME LOGIC: REVIEW (Listen & Find) ---
+// ==========================================
+// GAME ENGINES (TAB 1)
+// ==========================================
+
+// --- REVIEW GAME ---
 let currentReviewTarget = null;
 function initReviewGame() {
     const reviewOpts = document.getElementById('review-options');
     if (!reviewOpts) return;
-
     const l = LESSONS[currentLessonIdx];
     currentReviewTarget = l.items[Math.floor(Math.random() * l.items.length)];
     const options = [...l.items].sort(() => Math.random() - 0.5).slice(0, 3);
     if(!options.includes(currentReviewTarget)) options[0] = currentReviewTarget;
     options.sort(() => Math.random() - 0.5);
 
-    reviewOpts.innerHTML = options.map((opt, i) => `
+    reviewOpts.innerHTML = options.map((opt) => `
         <button onclick="checkReview('${opt.char}', this)" class="bg-white border-2 border-gray-200 px-8 py-6 rounded-2xl shadow-sm text-5xl font-black arabic-text hover:border-indigo-400 hover:scale-105 transition-all">${opt.char}</button>
     `).join('');
-    setTimeout(playTargetSound, 500);
+    setTimeout(() => {if(document.getElementById('review-options')) playSound(currentReviewTarget.sound, null);}, 500);
 }
-window.playTargetSound = () => {
-    if (currentReviewTarget) playSound(currentReviewTarget.sound, null);
-}
+window.playTargetSound = () => { if (currentReviewTarget) playSound(currentReviewTarget.sound, null); }
 window.checkReview = (char, btn) => {
     if(char === currentReviewTarget.char) {
         playSound('صَحِيح', null);
-        btn.classList.replace('border-gray-200', 'border-green-500');
-        btn.classList.add('bg-green-50');
-        setTimeout(() => {
-            if (document.getElementById('review-options')) initReviewGame();
-        }, 1500);
+        btn.classList.replace('border-gray-200', 'border-green-500'); btn.classList.add('bg-green-50');
+        setTimeout(() => { if (document.getElementById('review-options')) initReviewGame(); }, 1500);
     } else {
         triggerVib();
         btn.classList.replace('border-gray-200', 'border-red-500');
-        setTimeout(() => {
-            if (document.body.contains(btn)) btn.classList.replace('border-red-500', 'border-gray-200');
-        }, 500);
+        setTimeout(() => { if (document.body.contains(btn)) btn.classList.replace('border-red-500', 'border-gray-200'); }, 500);
     }
 }
 
-// --- GAME LOGIC: SHADDAH MERGE ---
+// --- TRICKY SOUNDS GAME ---
+let currentTrickyIdx = 0;
+function initTrickyGame() {
+    const area = document.getElementById('tricky-game-area');
+    if(!area) return;
+    const l = LESSONS[currentLessonIdx];
+    const item = l.items[currentTrickyIdx];
+    const options = [...item.pair].sort(() => Math.random() - 0.5);
+    
+    area.innerHTML = `
+        <div class="text-7xl mb-6">${item.icon}</div>
+        <button onclick="playSound('${item.word}', this)" class="mx-auto bg-indigo-100 text-indigo-600 p-6 rounded-full hover:scale-110 transition-transform mb-12 shadow-sm"><i data-lucide="volume-2" class="w-10 h-10"></i></button>
+        <div class="flex justify-center gap-6" id="tricky-opts">
+            ${options.map(opt => `<button onclick="checkTricky('${opt}', this)" class="bg-gray-50 border-4 border-gray-200 w-24 h-24 rounded-3xl text-5xl font-black arabic-text text-gray-700 hover:border-indigo-400 transition-all">${opt}</button>`).join('')}
+        </div>
+        <div id="tricky-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-[3rem]">
+            <h2 class="text-5xl font-black text-indigo-600 mb-6 arabic-text">${item.word}</h2>
+            <button onclick="nextTricky()" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-full shadow-lg">Next Word</button>
+        </div>
+    `;
+    lucide.createIcons();
+    setTimeout(() => {if(document.getElementById('tricky-game-area')) playSound(item.word, null);}, 500);
+}
+window.checkTricky = (val, btn) => {
+    const ans = LESSONS[currentLessonIdx].items[currentTrickyIdx].ans;
+    if(val === ans) {
+        playSound('صَحِيح', null);
+        btn.classList.replace('border-gray-200', 'border-green-500'); btn.classList.replace('text-gray-700', 'text-green-600');
+        setTimeout(() => {
+            const suc = document.getElementById('tricky-success');
+            if(suc) suc.classList.replace('hidden', 'flex');
+        }, 1000);
+    } else {
+        triggerVib();
+        btn.classList.replace('border-gray-200', 'border-red-500');
+        setTimeout(() => { if (document.body.contains(btn)) btn.classList.replace('border-red-500', 'border-gray-200'); }, 500);
+    }
+}
+window.nextTricky = () => { currentTrickyIdx = (currentTrickyIdx + 1) % LESSONS[currentLessonIdx].items.length; initTrickyGame(); }
+
+// --- SHADDAH GAME ---
 let currentShaddahIdx = 0;
 function initShaddahGame() {
     const shaddahArea = document.getElementById('shaddah-game-area');
@@ -323,10 +467,10 @@ function initShaddahGame() {
         <div class="text-4xl md:text-6xl font-black arabic-text text-gray-800 mb-12 flex justify-center items-center gap-4" dir="rtl">
             <span class="text-gray-400">${item.parts[0]} + ${item.parts[1]}</span>
             <span class="text-gray-400">=</span>
-            <div class="dropzone w-20 h-24 md:w-24 md:h-28 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center" data-ans="${item.joined}"></div>
+            <div class="dropzone w-20 h-24 md:w-24 md:h-28 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center" data-ans="${item.joined}" data-tts="${item.tts}"></div>
         </div>
         <div class="flex justify-center gap-6 flex-wrap" id="draggables-container" dir="rtl">
-            ${[...l.items].sort(() => Math.random() - 0.5).map((opt, i) => `
+            ${[...l.items].sort(() => Math.random() - 0.5).map((opt) => `
                 <div class="draggable bg-rose-50 border-2 border-rose-200 w-16 h-16 md:w-20 md:h-20 rounded-xl flex items-center justify-center text-4xl md:text-5xl font-black arabic-text text-rose-600 hover:scale-110 z-20 touch-none" draggable="true" data-val="${opt.joined}">${opt.joined}</div>
             `).join('')}
         </div>
@@ -336,35 +480,28 @@ function initShaddahGame() {
         </div>
     `;
     shaddahArea.innerHTML = html;
-    setupDraggables(handleShaddahDrop);
+    setupDraggables((zone, val, el) => {
+        if(zone.dataset.ans === val) {
+            playSound(zone.dataset.tts, null);
+            zone.innerHTML = `<span class="text-6xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
+            zone.classList.replace('border-dashed', 'border-solid');
+            zone.classList.replace('border-gray-300', 'border-green-400');
+            el.remove();
+            setTimeout(() => {
+                const successEl = document.getElementById('shaddah-success');
+                if(successEl) successEl.classList.replace('hidden', 'flex');
+            }, 1000);
+            return true;
+        } else {
+            triggerVib(); zone.classList.add('bg-red-50', 'border-red-400');
+            setTimeout(() => { if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400'); }, 500);
+            return false; 
+        }
+    });
 }
-function handleShaddahDrop(zone, val, el) {
-    if(zone.dataset.ans === val) {
-        playSound('صَحِيح', null);
-        zone.innerHTML = `<span class="text-6xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
-        zone.classList.replace('border-dashed', 'border-solid');
-        zone.classList.replace('border-gray-300', 'border-green-400');
-        el.remove();
-        setTimeout(() => {
-            const successEl = document.getElementById('shaddah-success');
-            if(successEl) successEl.classList.replace('hidden', 'flex');
-        }, 1000);
-    } else {
-        triggerVib();
-        zone.classList.add('bg-red-50', 'border-red-400');
-        setTimeout(() => {
-            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
-        }, 500);
-        return false; 
-    }
-    return true;
-}
-window.nextShaddah = () => {
-    currentShaddahIdx = (currentShaddahIdx + 1) % LESSONS[currentLessonIdx].items.length;
-    initShaddahGame();
-}
+window.nextShaddah = () => { currentShaddahIdx = (currentShaddahIdx + 1) % LESSONS[currentLessonIdx].items.length; initShaddahGame(); }
 
-// --- GAME LOGIC: SHAPE SHIFTER ---
+// --- SHAPE SHIFTER ---
 let currentShapeIdx = 0;
 function initShapeGame() {
     const shapeArea = document.getElementById('shape-game-area');
@@ -373,15 +510,14 @@ function initShapeGame() {
     const l = LESSONS[currentLessonIdx];
     const item = l.items[currentShapeIdx];
     
-    // Using RTL layout correctly: Right span is first in DOM, Left is second.
     let html = `
         <div class="text-6xl md:text-7xl font-black arabic-text text-gray-800 mb-12 flex justify-center items-center" dir="rtl">
             <span class="px-1">${item.parts[0]}</span>
             <div class="dropzone w-16 h-20 md:w-20 md:h-24 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center mx-1" data-ans="${item.ans}"></div>
             <span class="px-1">${item.parts[1]}</span>
         </div>
-        <div class="flex justify-center gap-6 flex-wrap" id="draggables-container" dir="rtl">
-            ${[item.beg, item.mid, item.end, item.base].sort(() => Math.random() - 0.5).map((opt, i) => `
+        <div class="flex justify-center gap-4 flex-wrap" id="draggables-container" dir="rtl">
+            ${[item.beg, item.mid, item.end, item.base].sort(() => Math.random() - 0.5).map((opt) => `
                 <div class="draggable bg-indigo-50 border-2 border-indigo-200 w-16 h-16 rounded-xl flex items-center justify-center text-4xl font-black arabic-text text-indigo-600 hover:scale-110 z-20 touch-none" draggable="true" data-val="${opt}">${opt}</div>
             `).join('')}
         </div>
@@ -391,35 +527,11 @@ function initShapeGame() {
         </div>
     `;
     shapeArea.innerHTML = html;
-    setupDraggables(handleShapeDrop);
+    setupDraggables(handleSingleDrop);
 }
-function handleShapeDrop(zone, val, el) {
-    if(zone.dataset.ans === val) {
-        playSound('صَحِيح', null);
-        zone.innerHTML = `<span class="text-5xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
-        zone.classList.replace('border-dashed', 'border-solid');
-        zone.classList.replace('border-gray-300', 'border-green-400');
-        el.remove();
-        setTimeout(() => {
-            const successEl = document.getElementById('shape-success');
-            if(successEl) successEl.classList.replace('hidden', 'flex');
-        }, 1000);
-    } else {
-        triggerVib();
-        zone.classList.add('bg-red-50', 'border-red-400');
-        setTimeout(() => {
-            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
-        }, 500);
-        return false; 
-    }
-    return true;
-}
-window.nextShape = () => {
-    currentShapeIdx = (currentShapeIdx + 1) % LESSONS[currentLessonIdx].items.length;
-    initShapeGame();
-}
+window.nextShape = () => { currentShapeIdx = (currentShapeIdx + 1) % LESSONS[currentLessonIdx].items.length; initShapeGame(); }
 
-// --- GAME LOGIC: SPELLING BEE (4x3 Pool) ---
+// --- SPELLING BEE (4x3 Pool) ---
 let currentSpellIdx = 0;
 function initSpellGame() {
     const spellArea = document.getElementById('spell-game-area');
@@ -429,7 +541,6 @@ function initSpellGame() {
     const word = l.words[currentSpellIdx];
     
     let wordParts = word.split || word.joined.split('');
-
     let pool = [...wordParts];
     while(pool.length < 12) {
         const rand = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
@@ -439,7 +550,7 @@ function initSpellGame() {
 
     let html = `
         <div class="text-7xl mb-6">${word.icon}</div>
-        <div class="flex justify-center gap-4 mb-10" dir="rtl" id="spell-dropzones">
+        <div class="flex justify-center gap-4 mb-10" dir="rtl" id="multi-dropzones">
             ${wordParts.map((char, i) => `
                 <div class="dropzone w-16 h-20 md:w-20 md:h-24 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex flex-col items-center justify-center relative flex-shrink-0" data-ans="${char}" data-filled="false">
                     <span class="text-xs text-gray-400 absolute bottom-2">${i+1}</span>
@@ -447,7 +558,7 @@ function initSpellGame() {
             `).join('')}
         </div>
         <div class="grid grid-cols-4 md:grid-cols-6 gap-3" dir="rtl" id="draggables-container">
-            ${pool.map((char, i) => `
+            ${pool.map((char) => `
                 <div class="draggable bg-indigo-50 border-b-4 border-indigo-200 h-14 md:h-16 rounded-xl flex items-center justify-center text-3xl font-black arabic-text text-indigo-700 hover:scale-105 active:scale-95 z-20 touch-none" draggable="true" data-val="${char}">${char}</div>
             `).join('')}
         </div>
@@ -458,42 +569,11 @@ function initSpellGame() {
         </div>
     `;
     spellArea.innerHTML = html;
-    setupDraggables(handleSpellDrop);
+    setupDraggables((z, v, el) => handleMultiDrop(z, v, el, word.joined));
 }
+window.nextSpell = () => { currentSpellIdx = (currentSpellIdx + 1) % LESSONS[currentLessonIdx].words.length; initSpellGame(); }
 
-function handleSpellDrop(zone, val, el) {
-    if(zone.dataset.ans === val && zone.dataset.filled === "false") {
-        playSound('صَحِيح', null);
-        zone.innerHTML = `<span class="text-4xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
-        zone.classList.replace('border-dashed', 'border-solid');
-        zone.classList.replace('border-gray-300', 'border-green-400');
-        zone.dataset.filled = "true";
-        el.remove();
-        
-        const allFilled = Array.from(document.querySelectorAll('#spell-dropzones .dropzone')).every(z => z.dataset.filled === "true");
-        if(allFilled) {
-            playSound(LESSONS[currentLessonIdx].words[currentSpellIdx].joined, null);
-            setTimeout(() => {
-                const successEl = document.getElementById('spell-success');
-                if(successEl) successEl.classList.replace('hidden', 'flex');
-            }, 1000);
-        }
-        return true;
-    } else {
-        triggerVib();
-        zone.classList.add('bg-red-50', 'border-red-400');
-        setTimeout(() => {
-            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
-        }, 500);
-        return false;
-    }
-}
-window.nextSpell = () => {
-    currentSpellIdx = (currentSpellIdx + 1) % LESSONS[currentLessonIdx].words.length;
-    initSpellGame();
-}
-
-// --- GAME LOGIC: SENTENCE TRAIN ---
+// --- SENTENCE TRAIN ---
 let currentSentIdx = 0;
 function initSentenceGame() {
     const sentArea = document.getElementById('sentence-game-area');
@@ -505,16 +585,16 @@ function initSentenceGame() {
 
     let html = `
         <div class="text-7xl mb-8">${s.icon}</div>
-        <div class="flex justify-center flex-wrap gap-4 mb-12" dir="rtl" id="sent-dropzones">
+        <div class="flex justify-center flex-wrap gap-4 mb-12" dir="rtl" id="multi-dropzones">
             ${s.words.map((w, i) => `
-                <div class="dropzone h-20 min-w-[120px] px-6 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center relative" data-ans="${w}" data-filled="false">
+                <div class="dropzone h-16 md:h-20 min-w-[80px] md:min-w-[100px] px-4 md:px-6 border-4 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex items-center justify-center relative" data-ans="${w}" data-filled="false">
                     <span class="text-xs text-gray-300 absolute -bottom-6">${i+1}</span>
                 </div>
             `).join('')}
         </div>
         <div class="flex justify-center flex-wrap gap-4" dir="rtl" id="draggables-container">
-            ${words.map((w, i) => `
-                <div class="draggable bg-teal-50 border-b-4 border-teal-200 px-6 py-3 rounded-2xl flex items-center justify-center text-3xl font-black arabic-text text-teal-700 hover:scale-105 active:scale-95 z-20 touch-none" draggable="true" data-val="${w}">${w}</div>
+            ${words.map((w) => `
+                <div class="draggable bg-teal-50 border-b-4 border-teal-200 px-4 md:px-6 py-2 md:py-3 rounded-2xl flex items-center justify-center text-2xl md:text-3xl font-black arabic-text text-teal-700 hover:scale-105 active:scale-95 z-20 touch-none" draggable="true" data-val="${w}">${w}</div>
             `).join('')}
         </div>
         <div id="sent-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-[2.5rem]">
@@ -523,39 +603,157 @@ function initSentenceGame() {
         </div>
     `;
     sentArea.innerHTML = html;
-    setupDraggables(handleSentDrop);
+    setupDraggables((z, v, el) => handleMultiDrop(z, v, el, s.full));
+}
+window.nextSent = () => { currentSentIdx = (currentSentIdx + 1) % LESSONS[currentLessonIdx].sentences.length; initSentenceGame(); }
+
+// --- ORDER THE TRAIN (Numbers, Days, Months) ---
+function initOrderGame() {
+    const area = document.getElementById('order-game-area');
+    if (!area) return;
+    const l = LESSONS[currentLessonIdx];
+    const items = [...l.items].sort(() => Math.random() - 0.5);
+
+    area.innerHTML = `
+        <div class="flex justify-center flex-wrap gap-3 mb-12" dir="rtl" id="multi-dropzones">
+            ${l.items.map((it, i) => `
+                <div class="dropzone h-14 md:h-16 min-w-[70px] md:min-w-[90px] px-2 md:px-4 border-4 border-dashed border-gray-300 rounded-xl bg-gray-50 flex items-center justify-center relative" data-ans="${it.ar}" data-filled="false">
+                    <span class="text-xs text-gray-400 absolute -bottom-5">${i+1}</span>
+                </div>
+            `).join('')}
+        </div>
+        <div class="flex justify-center flex-wrap gap-3" dir="rtl" id="draggables-container">
+            ${items.map((it) => `
+                <div class="draggable bg-sky-50 border-b-4 border-sky-200 px-4 md:px-6 py-2 rounded-xl flex items-center justify-center text-xl md:text-2xl font-black arabic-text text-sky-700 hover:scale-105 z-20 touch-none" draggable="true" data-val="${it.ar}">${it.ar}</div>
+            `).join('')}
+        </div>
+        <div id="multi-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-[2.5rem]">
+            <span class="text-6xl mb-4 animate-pop">🚂</span>
+            <h2 class="text-5xl font-black text-sky-500 mb-8 arabic-text">مُمْتَاز!</h2>
+            <button onclick="initOrderGame()" class="px-8 py-3 bg-sky-600 text-white font-bold rounded-full shadow-lg">Play Again 🔄</button>
+        </div>
+    `;
+    setupDraggables((z, v, el) => handleMultiDrop(z, v, el, "مُمْتَاز"));
 }
 
-function handleSentDrop(zone, val, el) {
+// --- SKY SORTER (Sun & Moon) ---
+function initSorterGame() {
+    const area = document.getElementById('sorter-game-area');
+    if (!area) return;
+    const l = LESSONS[currentLessonIdx];
+    const words = [...l.words].sort(() => Math.random() - 0.5);
+
+    area.innerHTML = `
+        <div class="flex justify-center gap-8 mb-12" id="sorter-dropzones">
+            <div class="dropzone w-32 h-40 md:w-40 md:h-48 border-4 border-dashed border-orange-300 rounded-[2rem] bg-orange-50 flex flex-col items-center justify-center relative" data-ans="sun">
+                <span class="text-5xl md:text-6xl absolute -top-8">☀️</span><span class="text-gray-400 font-bold mt-4">Shams</span>
+            </div>
+            <div class="dropzone w-32 h-40 md:w-40 md:h-48 border-4 border-dashed border-indigo-300 rounded-[2rem] bg-indigo-50 flex flex-col items-center justify-center relative" data-ans="moon">
+                <span class="text-5xl md:text-6xl absolute -top-8">🌙</span><span class="text-gray-400 font-bold mt-4">Qamar</span>
+            </div>
+        </div>
+        <div class="flex justify-center flex-wrap gap-4" dir="rtl" id="draggables-container">
+            ${words.map((w) => `
+                <div class="draggable bg-white shadow-sm border-b-4 border-gray-200 px-6 py-3 rounded-2xl flex items-center justify-center text-2xl font-black arabic-text text-gray-700 hover:scale-105 z-20 touch-none" draggable="true" data-val="${w.type}">${w.word}</div>
+            `).join('')}
+        </div>
+        <div id="sorter-success" class="hidden absolute inset-0 bg-white/95 z-50 flex-col items-center justify-center rounded-[2.5rem]">
+            <h2 class="text-5xl font-black text-yellow-500 mb-8 arabic-text">مُمْتَاز!</h2>
+            <button onclick="initSorterGame()" class="px-8 py-3 bg-yellow-500 text-white font-bold rounded-full shadow-lg">Play Again 🔄</button>
+        </div>
+    `;
+    
+    setupDraggables((zone, val, el) => {
+        if(zone.dataset.ans === val) {
+            playSound('صَحِيح', null);
+            zone.classList.add('scale-110'); setTimeout(()=>zone.classList.remove('scale-110'), 200);
+            el.style.position = 'relative'; el.style.left = 'auto'; el.style.top = 'auto';
+            el.classList.replace('draggable', 'pointer-events-none');
+            el.classList.add('scale-75', 'm-1');
+            zone.appendChild(el);
+            
+            if(document.querySelectorAll('.draggable').length === 0) {
+                setTimeout(() => {
+                    const suc = document.getElementById('sorter-success');
+                    if(suc) suc.classList.replace('hidden', 'flex');
+                }, 1000);
+            }
+            return true;
+        } else {
+            triggerVib(); zone.classList.add('border-red-400', 'bg-red-50');
+            setTimeout(() => { if (document.body.contains(zone)) zone.classList.remove('border-red-400', 'bg-red-50'); }, 500);
+            return false;
+        }
+    });
+}
+
+// --- X-RAY GLASSES ---
+function initXrayGame() {
+    const area = document.getElementById('xray-game-area');
+    if (!area) return;
+    const l = LESSONS[currentLessonIdx];
+    
+    area.innerHTML = l.items.map(i => `
+        <button onclick="revealXray(this, '${i.secret}')" class="bg-slate-800 text-white p-10 rounded-[2.5rem] shadow-xl hover:scale-[1.02] transition-transform relative overflow-hidden group">
+            <div class="absolute inset-0 bg-indigo-500 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+            <div class="text-6xl font-black arabic-text mb-4 transition-all duration-500 xray-target" dir="rtl">${i.word}</div>
+            <div class="text-gray-400 font-bold tracking-widest uppercase xray-eng">${i.eng}</div>
+        </button>
+    `).join('');
+}
+window.revealXray = (btn, secret) => {
+    const target = btn.querySelector('.xray-target');
+    if(target.innerText !== secret) {
+        playSound('صَحِيح', null);
+        target.style.transform = 'scale(1.2)'; target.style.color = '#10B981'; 
+        target.innerText = secret;
+        setTimeout(() => { playSound(secret, null); }, 500);
+    }
+}
+
+// --- REUSABLE DROP HANDLERS ---
+function handleSingleDrop(zone, val, el) {
+    if(zone.dataset.ans === val) {
+        playSound('صَحِيح', null);
+        zone.innerHTML = `<span class="text-5xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
+        zone.classList.replace('border-dashed', 'border-solid');
+        zone.classList.replace('border-gray-300', 'border-green-400');
+        el.remove();
+        setTimeout(() => {
+            const successEl = zone.parentElement.parentElement.querySelector('div[id$="-success"]');
+            if(successEl) successEl.classList.replace('hidden', 'flex');
+        }, 1000);
+        return true;
+    } else {
+        triggerVib(); zone.classList.add('bg-red-50', 'border-red-400');
+        setTimeout(() => { if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400'); }, 500);
+        return false; 
+    }
+}
+
+function handleMultiDrop(zone, val, el, finalSoundText) {
     if(zone.dataset.ans === val && zone.dataset.filled === "false") {
         playSound('صَحِيح', null);
-        zone.innerHTML = `<span class="text-3xl font-black arabic-text text-teal-600 animate-pop">${val}</span>`;
+        zone.innerHTML = `<span class="text-3xl md:text-4xl font-black arabic-text text-green-600 animate-pop">${val}</span>`;
         zone.classList.replace('border-dashed', 'border-solid');
-        zone.classList.replace('border-gray-300', 'border-teal-400');
+        zone.classList.replace('border-gray-300', 'border-green-400');
         zone.dataset.filled = "true";
         el.remove();
         
-        const allFilled = Array.from(document.querySelectorAll('#sent-dropzones .dropzone')).every(z => z.dataset.filled === "true");
+        const allFilled = Array.from(document.querySelectorAll('#multi-dropzones .dropzone')).every(z => z.dataset.filled === "true");
         if(allFilled) {
-            playSound(LESSONS[currentLessonIdx].sentences[currentSentIdx].full, null);
+            playSound(finalSoundText, null);
             setTimeout(() => {
-                const successEl = document.getElementById('sent-success');
+                const successEl = document.getElementById('multi-success');
                 if(successEl) successEl.classList.replace('hidden', 'flex');
-            }, 1500);
+            }, 1000);
         }
         return true;
     } else {
-        triggerVib();
-        zone.classList.add('bg-red-50', 'border-red-400');
-        setTimeout(() => {
-            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
-        }, 500);
+        triggerVib(); zone.classList.add('bg-red-50', 'border-red-400');
+        setTimeout(() => { if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400'); }, 500);
         return false;
     }
-}
-window.nextSent = () => {
-    currentSentIdx = (currentSentIdx + 1) % LESSONS[currentLessonIdx].sentences.length;
-    initSentenceGame();
 }
 
 // --- GAME LOGIC: MATCH EVERYTHING (Tab 2) ---
@@ -566,36 +764,43 @@ function initMatchGame() {
     const l = LESSONS[currentLessonIdx];
     let targets = []; let draggables = [];
     
-    // Adapt based on lesson type
-    if(l.type === 'review') {
+    if(l.type === 'review' || l.type === 'tricky') {
         const pool = [...l.items].sort(() => Math.random() - 0.5).slice(0, 4);
-        targets = pool.map(i => ({ tgt: i.sound.toUpperCase(), val: i.char }));
-        draggables = pool.map(i => i.char);
+        targets = pool.map(i => ({ tgt: (i.sound||i.word).toUpperCase(), val: (i.char||i.ans) }));
+        draggables = pool.map(i => ({ label: (i.char||i.ans), val: (i.char||i.ans) }));
     } else if (l.type === 'shaddah') {
         const pool = [...l.items].sort(() => Math.random() - 0.5).slice(0, 3);
         targets = pool.map(i => ({ tgt: `${i.parts[0]} + ${i.parts[1]}`, val: i.joined, isBig: true }));
-        draggables = pool.map(i => i.joined);
+        draggables = pool.map(i => ({ label: i.joined, val: i.joined }));
     } else if(l.type === 'shapes') {
         const pool = [...l.items].sort(() => Math.random() - 0.5).slice(0, 3);
-        targets = pool.map(i => ({ tgt: i.word, val: i.base, isBig: true }));
-        draggables = pool.map(i => i.base);
+        targets = pool.map(i => ({ tgt: i.word, val: i.ans, isBig: true }));
+        draggables = pool.map(i => ({ label: i.ans, val: i.ans }));
     } else if(l.type === 'words') {
         const pool = [...l.words].sort(() => Math.random() - 0.5).slice(0, 4);
         targets = pool.map(w => ({ tgt: (w.split||w.joined.split('')).join(' <span class="text-gray-300 text-lg">+</span> '), val: w.joined }));
-        draggables = pool.map(w => w.joined);
-    } else if (l.type === 'sentences') {
-        const pool = [...l.sentences].sort(() => Math.random() - 0.5).slice(0, 4);
-        targets = pool.map(s => ({ tgt: s.icon, val: s.full, isBig: true }));
-        draggables = pool.map(s => s.full);
-    } 
+        draggables = pool.map(w => ({ label: w.joined, val: w.joined }));
+    } else if (l.type === 'sentences' || l.type === 'order') {
+        const pool = [...(l.sentences || l.items)].sort(() => Math.random() - 0.5).slice(0, 4);
+        targets = pool.map(s => ({ tgt: (s.eng || s.icon), val: (s.full || s.ar), isBig: true }));
+        draggables = pool.map(s => ({ label: (s.full || s.ar), val: (s.full || s.ar) }));
+    } else if (l.type === 'sorter') {
+        const pool = [...l.words].sort(() => Math.random() - 0.5).slice(0, 4);
+        targets = pool.map(w => ({ tgt: w.word, val: w.type, isBig: true }));
+        draggables = pool.map(w => ({ label: w.type === 'sun' ? '☀️ شَمْسِيَّة' : '🌙 قَمَرِيَّة', val: w.type }));
+    } else if (l.type === 'xray') {
+        const pool = [...l.items].sort(() => Math.random() - 0.5).slice(0, 4);
+        targets = pool.map(i => ({ tgt: i.word, val: i.secret, isBig: true }));
+        draggables = pool.map(i => ({ label: i.secret, val: i.secret }));
+    }
 
     draggables.sort(() => Math.random() - 0.5);
 
-    let html = `
+    container.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12" dir="rtl" id="match-dropzones">
             ${targets.map(t => `
                 <div class="bg-gray-50 p-4 rounded-3xl border-2 border-gray-200 flex items-center justify-between gap-4">
-                    <div class="text-3xl font-bold arabic-text text-gray-600 ${t.isBig?'text-4xl':''} flex-1 text-right pl-2">${t.tgt}</div>
+                    <div class="text-2xl font-bold arabic-text text-gray-600 ${t.isBig?'md:text-4xl':'md:text-3xl'} flex-1 text-right pl-2">${t.tgt}</div>
                     <div class="dropzone h-16 min-w-[100px] px-4 bg-white border-4 border-dashed border-gray-300 rounded-2xl flex items-center justify-center shadow-inner relative flex-shrink-0" data-ans="${t.val}" data-filled="false">
                         <span class="text-gray-300 text-xs pointer-events-none">Drop here</span>
                     </div>
@@ -604,8 +809,8 @@ function initMatchGame() {
         </div>
         <div class="flex justify-center flex-wrap gap-4 w-full p-6 bg-gray-50 rounded-3xl border-2 border-gray-100" id="draggables-container" dir="rtl">
             ${draggables.map(d => `
-                <div class="draggable bg-white shadow-md border-b-4 border-indigo-200 px-6 py-3 rounded-2xl flex items-center justify-center hover:scale-105 z-20 touch-none" draggable="true" data-val="${d}">
-                    <span class="text-2xl font-black arabic-text text-indigo-600 pointer-events-none">${d}</span>
+                <div class="draggable bg-white shadow-md border-b-4 border-indigo-200 px-6 py-3 rounded-2xl flex items-center justify-center hover:scale-105 z-20 touch-none" draggable="true" data-val="${d.val}">
+                    <span class="text-xl md:text-2xl font-black arabic-text text-indigo-600 pointer-events-none">${d.label}</span>
                 </div>
             `).join('')}
         </div>
@@ -615,37 +820,63 @@ function initMatchGame() {
             <button onclick="initMatchGame()" class="px-8 py-4 bg-indigo-600 text-white font-black text-xl rounded-full shadow-lg">Play Again 🔄</button>
         </div>
     `;
-    container.innerHTML = html;
     lucide.createIcons();
-    setupDraggables(handleMatchDrop);
+    setupDraggables((zone, val, el) => {
+        if(zone.dataset.ans === val && zone.dataset.filled === "false") {
+            playSound('صَحِيح', null);
+            zone.innerHTML = `<span class="text-xl md:text-2xl font-black arabic-text text-green-600 animate-pop leading-none pointer-events-none">${el.innerText}</span>`;
+            zone.classList.replace('border-dashed', 'border-solid');
+            zone.classList.replace('border-gray-300', 'border-green-400');
+            zone.classList.add('bg-green-50');
+            zone.dataset.filled = "true";
+            el.remove();
+            
+            if(Array.from(document.querySelectorAll('#match-dropzones .dropzone')).every(z => z.dataset.filled === "true")) {
+                setTimeout(() => {
+                    const suc = document.getElementById('match-success');
+                    if(suc) suc.classList.replace('hidden', 'flex');
+                }, 1000);
+            }
+            return true;
+        } else {
+            triggerVib(); zone.classList.add('bg-red-50', 'border-red-400');
+            setTimeout(() => { if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400'); }, 500);
+            return false;
+        }
+    });
 }
 
-function handleMatchDrop(zone, val, el) {
-    if(zone.dataset.ans === val && zone.dataset.filled === "false") {
-        playSound('صَحِيح', null);
-        zone.innerHTML = `<span class="text-2xl font-black arabic-text text-green-600 animate-pop leading-none pointer-events-none">${val}</span>`;
-        zone.classList.replace('border-dashed', 'border-solid');
-        zone.classList.replace('border-gray-300', 'border-green-400');
-        zone.classList.add('bg-green-50');
-        zone.dataset.filled = "true";
-        el.remove();
-        
-        const allFilled = Array.from(document.querySelectorAll('#match-dropzones .dropzone')).every(z => z.dataset.filled === "true");
-        if(allFilled) {
-            setTimeout(() => {
-                const successEl = document.getElementById('match-success');
-                if(successEl) successEl.classList.replace('hidden', 'flex');
-            }, 1000);
-        }
-        return true;
-    } else {
-        triggerVib();
-        zone.classList.add('bg-red-50', 'border-red-400');
-        setTimeout(() => {
-            if (document.body.contains(zone)) zone.classList.remove('bg-red-50', 'border-red-400');
-        }, 500);
-        return false;
-    }
+// --- AL-FATIHAH ENGINE ---
+function initFatihah() {
+    const l = LESSONS[currentLessonIdx];
+    const container = document.getElementById('fatihah-container');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="flex flex-col items-center gap-6" dir="rtl">
+            ${l.verses.map(v => `
+                <div id="verse-${v.id}" onclick="playQuranVerse(${v.id})" class="quran-verse text-3xl md:text-5xl font-black arabic-text text-gray-800 text-center leading-loose hover:bg-emerald-50 rounded-2xl p-4 w-full">
+                    ${v.ar} <span class="text-emerald-300 text-2xl font-sans ml-2">﴿${v.id}﴾</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+window.playQuranVerse = function(verseId) {
+    if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+    document.querySelectorAll('.quran-verse').forEach(el => el.classList.remove('active'));
+    
+    const el = document.getElementById(`verse-${verseId}`);
+    if (el) el.classList.add('active');
+
+    // Mishary Alafasy Audio API
+    const audioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${verseId}.mp3`;
+    currentAudio = new Audio(audioUrl);
+    currentAudio.play();
+    currentAudio.onended = () => {
+        if (el) el.classList.remove('active');
+        if (verseId < 7) setTimeout(() => playQuranVerse(verseId + 1), 500);
+    };
 }
 
 // --- UNIVERSAL DRAG & DROP ENGINE ---
@@ -656,26 +887,18 @@ function setupDraggables(dropHandler) {
 
     draggables.forEach(d => {
         d.addEventListener('dragstart', (e) => {
-            draggedItem = d;
-            setTimeout(() => d.classList.add('is-dragging'), 0);
-            e.dataTransfer.setData('text/plain', d.dataset.val);
+            draggedItem = d; setTimeout(() => d.classList.add('is-dragging'), 0); e.dataTransfer.setData('text/plain', d.dataset.val);
         });
         d.addEventListener('dragend', () => { d.classList.remove('is-dragging'); draggedItem = null; });
         
         d.addEventListener('touchstart', (e) => {
-            draggedItem = d;
-            initialTransform = d.style.transform;
-            d.style.position = 'absolute'; d.style.zIndex = '100';
-            document.body.appendChild(d);
-            moveEl(d, e.touches[0].clientX, e.touches[0].clientY);
+            draggedItem = d; initialTransform = d.style.transform; d.style.position = 'absolute'; d.style.zIndex = '100';
+            document.body.appendChild(d); moveEl(d, e.touches[0].clientX, e.touches[0].clientY);
         }, {passive: false});
 
         d.addEventListener('touchmove', (e) => {
-            e.preventDefault(); 
-            if (!draggedItem) return;
-            const touch = e.touches[0];
+            e.preventDefault(); if (!draggedItem) return; const touch = e.touches[0];
             moveEl(draggedItem, touch.clientX, touch.clientY);
-            
             dropzones.forEach(z => {
                 const r = z.getBoundingClientRect();
                 if (touch.clientX >= r.left && touch.clientX <= r.right && touch.clientY >= r.top && touch.clientY <= r.bottom) {
@@ -685,23 +908,16 @@ function setupDraggables(dropHandler) {
         }, {passive: false});
 
         d.addEventListener('touchend', (e) => {
-            if (!draggedItem) return;
-            const touch = e.changedTouches[0];
-            let dropped = false;
-
+            if (!draggedItem) return; const touch = e.changedTouches[0]; let dropped = false;
             dropzones.forEach(z => {
                 const r = z.getBoundingClientRect();
                 if (touch.clientX >= r.left && touch.clientX <= r.right && touch.clientY >= r.top && touch.clientY <= r.bottom) {
-                    if(z.dataset.filled !== "true" && !z.classList.contains('draggable-placed')) {
-                        dropped = dropHandler(z, draggedItem.dataset.val, draggedItem);
-                    }
+                    if(z.dataset.filled !== "true" && !z.classList.contains('draggable-placed')) { dropped = dropHandler(z, draggedItem.dataset.val, draggedItem); }
                 }
                 z.classList.remove('dragover');
             });
-
             if (!dropped) {
-                draggedItem.style.position = 'relative';
-                draggedItem.style.left = 'auto'; draggedItem.style.top = 'auto';
+                draggedItem.style.position = 'relative'; draggedItem.style.left = 'auto'; draggedItem.style.top = 'auto';
                 draggedItem.style.transform = initialTransform;
                 const container = document.getElementById('draggables-container');
                 if(container) container.appendChild(draggedItem);
@@ -711,15 +927,10 @@ function setupDraggables(dropHandler) {
     });
 
     dropzones.forEach(z => {
-        z.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if(z.dataset.filled !== "true" && !z.classList.contains('draggable-placed')) z.classList.add('dragover');
-        });
+        z.addEventListener('dragover', (e) => { e.preventDefault(); if(z.dataset.filled !== "true" && !z.classList.contains('draggable-placed')) z.classList.add('dragover'); });
         z.addEventListener('dragleave', () => z.classList.remove('dragover'));
         z.addEventListener('drop', (e) => {
-            e.preventDefault();
-            z.classList.remove('dragover');
-            const val = e.dataTransfer.getData('text/plain');
+            e.preventDefault(); z.classList.remove('dragover'); const val = e.dataTransfer.getData('text/plain');
             const el = document.querySelector(`.draggable[data-val="${val}"]`);
             if(el) dropHandler(z, val, el);
         });
@@ -729,49 +940,26 @@ function moveEl(el, x, y) { el.style.left = (x - el.offsetWidth/2) + 'px'; el.st
 
 // --- NAVIGATION ---
 window.changeLesson = function(idx) { 
-    currentLessonIdx = idx; 
-    currentTab = 0; 
-    const scrollArea = document.getElementById('main-scroll-area');
-    if(scrollArea) scrollArea.scrollTop = 0; 
+    currentLessonIdx = idx; currentTab = 0; 
+    const scrollArea = document.getElementById('main-scroll-area'); if(scrollArea) scrollArea.scrollTop = 0; 
+    if (currentAudio) { currentAudio.pause(); }
     updateAll(); 
 }
-
 window.changeTab = function(idx) { 
     currentTab = idx; 
-    const scrollArea = document.getElementById('main-scroll-area');
-    if(scrollArea) scrollArea.scrollTop = 0; 
+    const scrollArea = document.getElementById('main-scroll-area'); if(scrollArea) scrollArea.scrollTop = 0; 
     updateAll(); 
 }
-
-window.prevLesson = function() {
-    if (currentLessonIdx > 0) changeLesson(currentLessonIdx - 1);
-}
-
-window.nextLesson = function() {
-    if (currentLessonIdx < LESSONS.length - 1) changeLesson(currentLessonIdx + 1);
-}
+window.prevLesson = function() { if (currentLessonIdx > 0) changeLesson(currentLessonIdx - 1); }
+window.nextLesson = function() { if (currentLessonIdx < LESSONS.length - 1) changeLesson(currentLessonIdx + 1); }
 
 function updateButtons() {
-    const btnPrev = document.getElementById('btn-prev');
-    const btnNext = document.getElementById('btn-next');
-    if(btnPrev) {
-        btnPrev.disabled = currentLessonIdx === 0;
-        btnPrev.style.opacity = currentLessonIdx === 0 ? '0.5' : '1';
-        btnPrev.style.cursor = currentLessonIdx === 0 ? 'not-allowed' : 'pointer';
-    }
-    if(btnNext) {
-        btnNext.disabled = currentLessonIdx === LESSONS.length - 1;
-        btnNext.style.opacity = currentLessonIdx === LESSONS.length - 1 ? '0.5' : '1';
-        btnNext.style.cursor = currentLessonIdx === LESSONS.length - 1 ? 'not-allowed' : 'pointer';
-    }
+    const btnPrev = document.getElementById('btn-prev'); const btnNext = document.getElementById('btn-next');
+    if(btnPrev) { btnPrev.disabled = currentLessonIdx === 0; btnPrev.style.opacity = currentLessonIdx === 0 ? '0.5' : '1'; btnPrev.style.cursor = currentLessonIdx === 0 ? 'not-allowed' : 'pointer'; }
+    if(btnNext) { btnNext.disabled = currentLessonIdx === LESSONS.length - 1; btnNext.style.opacity = currentLessonIdx === LESSONS.length - 1 ? '0.5' : '1'; btnNext.style.cursor = currentLessonIdx === LESSONS.length - 1 ? 'not-allowed' : 'pointer'; }
 }
 
-function updateAll() { 
-    renderSidebar(); 
-    renderTabs(); 
-    renderMainContent(); 
-    updateButtons();
-}
+function updateAll() { renderSidebar(); renderTabs(); renderMainContent(); updateButtons(); }
 
 // --- INIT ---
 updateAll();
